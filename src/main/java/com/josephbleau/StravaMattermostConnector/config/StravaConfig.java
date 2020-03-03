@@ -1,15 +1,18 @@
 package com.josephbleau.StravaMattermostConnector.config;
 
+import javastrava.auth.AuthorisationService;
+import javastrava.auth.impl.AuthorisationServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class StravaOauthDetails {
+public class StravaConfig {
     @Value("${strava.oauth.token-endpoint}")
     private String tokenEndpoint;
 
     @Value("${strava.oauth.client-id}")
-    private Long clientId;
+    private Integer clientId;
 
     @Value("${strava.oauth.client-secret}")
     private String clientSecret;
@@ -20,11 +23,19 @@ public class StravaOauthDetails {
     @Value("${strava.oauth.grant-type}")
     private String grantType;
 
+    @Value("${strava.api.code}")
+    private String code;
+
+    @Bean
+    public AuthorisationService authorisationService() {
+        return new AuthorisationServiceImpl();
+    }
+
     public String getTokenEndpoint() {
         return tokenEndpoint;
     }
 
-    public Long getClientId() {
+    public Integer getClientId() {
         return clientId;
     }
 
@@ -38,5 +49,9 @@ public class StravaOauthDetails {
 
     public String getGrantType() {
         return grantType;
+    }
+
+    public String getCode() {
+        return code;
     }
 }

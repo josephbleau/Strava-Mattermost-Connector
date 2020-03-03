@@ -1,6 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.model.strava;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javastrava.model.StravaAthlete;
 
 public class StravaAuthToken {
     @JsonProperty("token_type")

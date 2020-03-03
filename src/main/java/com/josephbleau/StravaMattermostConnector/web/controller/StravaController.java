@@ -8,7 +8,11 @@ import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @RequestMapping("/strava")
@@ -23,15 +27,25 @@ public class StravaController {
         this.stravaApiService = stravaApiService;
     }
 
-    @RequestMapping(path = "/event", method = RequestMethod.POST)
+    @GetMapping("/authorize")
+    public RedirectView redirectWithUsingRedirectView() {
+        return new RedirectView(stravaApiService.getAuthorizeUrl());
+    }
+
+    @GetMapping("/code")
+    public void code(@RequestParam("code") String code) {
+        System.out.println("code: " + code);
+    }
+
+    @PostMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
     public void event(@RequestBody StravaEventRequestDTO request) {
-        if (request.getObjectType() == StravaObjectTypeDTO.activity) {
+        if (StravaObjectTypeDTO.activity.equals(request.getObjectType())) {
             this.mattermostService.postActivity(stravaApiService.getActivity(request.getObjectId()));
         }
     }
 
-    @RequestMapping(path = "/event", method = RequestMethod.GET)
+    @GetMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody StravaWebookChallengeResponseDTO createWebhookSubscription(
             @RequestParam("hub.mode") String mode,

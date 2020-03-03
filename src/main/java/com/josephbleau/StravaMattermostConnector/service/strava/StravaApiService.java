@@ -1,16 +1,11 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
-import com.josephbleau.StravaMattermostConnector.model.strava.StravaActivity;
+import javastrava.model.StravaActivity;
+import javastrava.service.Strava;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class StravaApiService {
@@ -27,27 +22,19 @@ public class StravaApiService {
     @Value("${strava.api.activity-endpoint}")
     private String activityEndpoint;
 
-    private final StravaOauthService stravaOauthService;
-    private final RestTemplate restTemplate;
+
+
+    private final StravaAuthenticationService stravaAuthenticationService;
 
     @Autowired
-    private StravaApiService(StravaOauthService stravaOauthService, RestTemplate restTemplate) {
-        this.stravaOauthService = stravaOauthService;
-        this.restTemplate = restTemplate;
-    }
-
-    MultiValueMap<String, String> getAuthHeader() {
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", "Bearer " + stravaOauthService.getAccessToken().getAccessToken());
-        return headers;
+    private StravaApiService(StravaAuthenticationService stravaAuthenticationService) {
+        this.stravaAuthenticationService = stravaAuthenticationService;
     }
 
     public StravaActivity getActivity(long activityId) {
-        HttpEntity<Object> requestEntity = new HttpEntity<>(null, getAuthHeader());
-        Map<String, String> pathParameters = new HashMap<>();
-        pathParameters.put("id", String.valueOf(activityId));
-        HttpEntity<StravaActivity> activity = restTemplate.postForEntity(apiUrl + activityEndpoint, requestEntity, StravaActivity.class, pathParameters);
-        return activity.getBody();
+        Strava strava = stravaAuthenticationService.getAuthenticatedStrava();
+        StravaActivity activity = strava.getActivity(activityId);
+        return activity;
     }
 
     public boolean verifySubscriptionToken(String verificationToken) {
@@ -56,5 +43,9 @@ public class StravaApiService {
         }
 
         return verificationToken.equals(subscriptionVerificationToken);
+    }
+
+    public String getAuthorizeUrl() {
+        return this.stravaAuthenticationService.getAuthorizeUrl();
     }
 }

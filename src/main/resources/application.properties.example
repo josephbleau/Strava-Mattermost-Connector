@@ -15,3 +15,6 @@ strava.oauth.grant-type=refresh_token
 strava.oauth.client-id=
 strava.oauth.client-secret=
 strava.oauth.refresh-token=
+strava.oauth.authorize-url=https://www.strava.com/oauth/authorize?client_id={clientId}&redirect_url={redirectUrl}&scope=activity:read_all
+strava.oauth.authorize-redirect-url=[app url]/strava/code
+strava.api.code=
