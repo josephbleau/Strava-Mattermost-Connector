@@ -3,6 +3,7 @@ package com.josephbleau.StravaMattermostConnector.web.controller;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
 import com.josephbleau.StravaMattermostConnector.service.strava.StravaApiService;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaEventRequestDTO;
+import com.josephbleau.StravaMattermostConnector.web.dto.StravaObjectTypeDTO;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,9 @@ public class StravaController {
     @RequestMapping(path = "/event", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public void event(@RequestBody StravaEventRequestDTO request) {
-        stravaApiService.getActivity(1);
-        this.mattermostService.postActivity();
+        if (request.getObjectType() == StravaObjectTypeDTO.activity) {
+            this.mattermostService.postActivity(stravaApiService.getActivity(request.getObjectId()));
+        }
     }
 
     @RequestMapping(path = "/event", method = RequestMethod.GET)

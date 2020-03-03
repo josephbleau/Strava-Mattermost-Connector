@@ -1,5 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.service.mattermost;
 
+import com.josephbleau.StravaMattermostConnector.model.strava.StravaActivity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +34,14 @@ public class MattermostService {
         this.restTemplate = restTemplate;
     }
 
-    public void postActivity() {
+    public void postActivity(StravaActivity activity) {
         String url = mmUrl + ":" + mmPort + "/hooks/" + mmWebhookToken;
 
         MattermostPayloadDTO mmPayload = new MattermostPayloadDTO();
         mmPayload.setChannel(this.mmChannel);
         mmPayload.setUsername(this.mmUsername);
         mmPayload.setIcon_url(this.mmUserIconUrl);
-        mmPayload.setText("Test");
+        mmPayload.setText(activity.getName());
 
         ResponseEntity<Object> response = this.restTemplate.postForEntity(url, mmPayload, Object.class);
 

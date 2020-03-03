@@ -20,4 +20,28 @@ public class StravaEventRequestDTO {
 
     @JsonProperty("subscription_id")
     private Integer subscriptionId;
+
+    public StravaObjectTypeDTO getObjectType() {
+        return objectType;
+    }
+
+    public StravaAspectTypeDTO getAspectType() {
+        return aspectType;
+    }
+
+    public Long getEventTime() {
+        return eventTime;
+    }
+
+    public Long getObjectId() {
+        return objectId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public Integer getSubscriptionId() {
+        return subscriptionId;
+    }
 }

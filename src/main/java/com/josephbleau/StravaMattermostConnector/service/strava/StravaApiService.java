@@ -1,11 +1,16 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
 import com.josephbleau.StravaMattermostConnector.model.strava.StravaActivity;
-import com.josephbleau.StravaMattermostConnector.model.strava.StravaAuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class StravaApiService {
@@ -31,9 +36,18 @@ public class StravaApiService {
         this.restTemplate = restTemplate;
     }
 
+    MultiValueMap<String, String> getAuthHeader() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Authorization", "Bearer " + stravaOauthService.getAccessToken().getAccessToken());
+        return headers;
+    }
+
     public StravaActivity getActivity(long activityId) {
-        StravaAuthToken token = stravaOauthService.getAccessToken();
-        return null;
+        HttpEntity<Object> requestEntity = new HttpEntity<>(null, getAuthHeader());
+        Map<String, String> pathParameters = new HashMap<>();
+        pathParameters.put("id", String.valueOf(activityId));
+        HttpEntity<StravaActivity> activity = restTemplate.postForEntity(apiUrl + activityEndpoint, requestEntity, StravaActivity.class, pathParameters);
+        return activity.getBody();
     }
 
     public boolean verifySubscriptionToken(String verificationToken) {
