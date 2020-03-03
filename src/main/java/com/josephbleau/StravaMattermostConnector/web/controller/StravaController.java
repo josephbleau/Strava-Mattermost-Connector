@@ -25,6 +25,7 @@ public class StravaController {
     @RequestMapping(path = "/event", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public void event(@RequestBody StravaEventRequestDTO request) {
+        stravaApiService.getActivity(1);
         this.mattermostService.postActivity();
     }
 

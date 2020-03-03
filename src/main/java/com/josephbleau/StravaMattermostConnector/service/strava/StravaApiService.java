@@ -1,7 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
 import com.josephbleau.StravaMattermostConnector.model.strava.StravaActivity;
-import com.josephbleau.StravaMattermostConnector.web.dto.StravaAspectTypeDTO;
+import com.josephbleau.StravaMattermostConnector.model.strava.StravaAuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,14 +22,17 @@ public class StravaApiService {
     @Value("${strava.api.activity-endpoint}")
     private String activityEndpoint;
 
+    private final StravaOauthService stravaOauthService;
     private final RestTemplate restTemplate;
 
     @Autowired
-    private StravaApiService(RestTemplate restTemplate) {
+    private StravaApiService(StravaOauthService stravaOauthService, RestTemplate restTemplate) {
+        this.stravaOauthService = stravaOauthService;
         this.restTemplate = restTemplate;
     }
 
     public StravaActivity getActivity(long activityId) {
+        StravaAuthToken token = stravaOauthService.getAccessToken();
         return null;
     }
 

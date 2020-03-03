@@ -10,3 +10,8 @@ strava.subscription.verify-token=STRAVA
 
 strava.api.url=https://www.strava.com/api/v3
 strava.api.activity-endpoint=/activities/{{id}}
+strava.oauth.token-endpoint=https://www.strava.com/api/v3/oauth/token
+strava.oauth.grant-type=refresh_token
+strava.oauth.client-id=
+strava.oauth.client-secret=
+strava.oauth.refresh-token=

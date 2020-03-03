@@ -1,6 +1,5 @@
 package com.josephbleau.StravaMattermostConnector.service.mattermost;
 
-import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostPayloadDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
