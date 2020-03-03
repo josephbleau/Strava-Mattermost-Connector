@@ -1,0 +1,12 @@
+mattermost.url=http://localhost
+mattermost.port=8065
+mattermost.hook-token=
+mattermost.channel=Running
+mattermost.user.name=StravaBot
+mattermost.user.icon-url=http://127.0.0.1:8080/img/user_icon.png
+
+strava.subscription.id=
+strava.subscription.verify-token=STRAVA
+
+strava.api.url=https://www.strava.com/api/v3
+strava.api.activity-endpoint=/activities/{{id}}
