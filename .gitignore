@@ -34,4 +34,4 @@ build/
 mvnw
 mvnw.cmd
 
-*.yml
+application-local.yml
