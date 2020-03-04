@@ -1,6 +1,6 @@
 mattermost:
   url: ${MATTERMOST_URL}
-  port: 8065
+  port: 80
   hook-token: ${HOOK_TOKEN}
   channel: Running
   user:
