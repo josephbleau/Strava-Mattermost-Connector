@@ -1,7 +1,7 @@
 mattermost:
   url: ${MATTERMOST_URL}
   port: 8065
-  hook-token: ${HOOK_TOKEN}}
+  hook-token: ${HOOK_TOKEN}
   channel: Running
   user:
     name: StravaBot
@@ -19,8 +19,8 @@ strava:
       token-endpoint: https://www.strava.com/api/v3/oauth/token
       grant-type: refresh_token
       client-id: ${CLIENT_ID}
-      client-secret: ${CLIENT_SECRET}}
-      refresh-token: ${REFRESH_TOKEN}}
+      client-secret: ${CLIENT_SECRET}
+      refresh-token: ${REFRESH_TOKEN}
       authorize-url: https://www.strava.com/oauth/authorize?client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}&scope=activity:read_all
       authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/strava/auth
 
