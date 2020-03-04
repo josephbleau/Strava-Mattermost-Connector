@@ -18,3 +18,13 @@ strava.oauth.refresh-token=
 strava.oauth.authorize-url=https://www.strava.com/oauth/authorize?client_id={clientId}&redirect_url={redirectUrl}&scope=activity:read_all
 strava.oauth.authorize-redirect-url=[app url]/strava/code
 strava.api.code=
+
+connector.approval-url=
+
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.h2.console.enabled=true
