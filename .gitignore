@@ -29,7 +29,6 @@ build/
 
 ### VS Code ###
 .vscode/
-*.properties
 .mvn/
 mvnw
 mvnw.cmd
