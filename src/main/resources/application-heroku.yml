@@ -8,7 +8,7 @@ mattermost:
     icon-url: https://strava-mattermost-connector.herokuapp.com/img/user_icon.png
 
 strava:
-    subscription.id: ${SUBSCRIPTION_ID}}
+    subscription.id: ${SUBSCRIPTION_ID}
     subscription:
       verify-token: STRAVA
     api:
