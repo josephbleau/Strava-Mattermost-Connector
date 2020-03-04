@@ -14,6 +14,14 @@
 	<name>StravaMattermostConnector</name>
 	<description>Demo project for Spring Boot</description>
 
+	<repositories>
+		<repository>
+			<id>project.local</id>
+			<name>project</name>
+			<url>file:${project.basedir}/repo</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
