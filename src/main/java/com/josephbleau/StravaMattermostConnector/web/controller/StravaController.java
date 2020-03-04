@@ -1,7 +1,9 @@
 package com.josephbleau.StravaMattermostConnector.web.controller;
 
+import com.josephbleau.StravaMattermostConnector.service.connector.RegistrationService;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
 import com.josephbleau.StravaMattermostConnector.service.strava.StravaApiService;
+import com.josephbleau.StravaMattermostConnector.service.strava.StravaSubscriptionService;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaEventRequestDTO;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaObjectTypeDTO;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeResponseDTO;
@@ -17,30 +19,46 @@ public class StravaController {
 
     private MattermostService mattermostService;
     private StravaApiService stravaApiService;
+    private StravaSubscriptionService stravaSubscriptionService;
+    private RegistrationService registrationService;
 
     @Autowired
-    public StravaController(MattermostService mattermostService, StravaApiService stravaApiService) {
+    public StravaController(MattermostService mattermostService, StravaApiService stravaApiService, StravaSubscriptionService stravaSubscriptionService, RegistrationService registrationService) {
         this.mattermostService = mattermostService;
         this.stravaApiService = stravaApiService;
+        this.stravaSubscriptionService = stravaSubscriptionService;
+        this.registrationService = registrationService;
     }
 
+    /**
+     * Redirect the user to the Strava app authorization view.
+     */
     @GetMapping("/register")
     public RedirectView register() {
         return new RedirectView(stravaApiService.getAuthorizeUrl());
     }
 
+    /**
+     * Callback that is invoked when a user authorizes our application.
+     */
     @GetMapping("/auth")
     @ResponseStatus(HttpStatus.OK)
     public void auth(@RequestParam("code") String code) {
         mattermostService.postAddRequest(code);
     }
 
+    /**
+     * Called when a user from matter-most verifies a registration.
+     */
     @GetMapping("/add")
     @ResponseStatus(HttpStatus.OK)
     public void add(@RequestParam("code") String code) {
-        stravaApiService.registerAthlete(code);
+        registrationService.registerAthlete(code);
     }
 
+    /**
+     * Strava Webhook callback. This endpoint is called whenever an activity is created, updated, or deleted.
+     */
     @PostMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
     public void event(@RequestBody StravaEventRequestDTO request) {
@@ -49,6 +67,10 @@ public class StravaController {
         }
     }
 
+    /**
+     * Strava Subscription challenge callback. When a new webhook subscription is requested this endpoint is provided
+     * and echos the challenge payload back to the caller.
+     */
     @GetMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody StravaWebookChallengeResponseDTO createWebhookSubscription(
@@ -56,7 +78,7 @@ public class StravaController {
             @RequestParam("hub.challenge") String challenge,
             @RequestParam("hub.verify_token") String token) {
 
-        if (stravaApiService.verifySubscriptionToken(token)) {
+        if (stravaSubscriptionService.verifySubscriptionToken(token)) {
             return new StravaWebookChallengeResponseDTO(challenge);
         }
 

@@ -1,45 +1,37 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
+import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
+import javastrava.auth.TokenManager;
+import javastrava.auth.model.Token;
+import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
 import javastrava.service.Strava;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 @Service
 public class StravaApiService {
 
-    @Value("${strava.subscription.id}")
-    private Integer subscriptionId;
-
-    @Value("${strava.subscription.verify-token}")
-    private String subscriptionVerificationToken;
-
-    private final StravaAuthenticationService stravaAuthenticationService;
+    private StravaConfig stravaConfig;
 
     @Autowired
-    private StravaApiService(StravaAuthenticationService stravaAuthenticationService) {
-        this.stravaAuthenticationService = stravaAuthenticationService;
+    public StravaApiService(StravaConfig stravaConfig) {
+        this.stravaConfig = stravaConfig;
     }
 
-    public void registerAthlete(String code) {
-        this.stravaAuthenticationService.getAuthenticatedStravaByCode(code);
+    private Strava strava(int athleteId) {
+        TokenManager tokenManager = TokenManager.instance();
+        Token token = tokenManager.retrieveTokenWithExactScope(athleteId, new ArrayList<>());
+        return new Strava(token);
     }
 
     public StravaActivity getActivityForAthlete(long activityId, int athleteId) {
-        Strava strava = stravaAuthenticationService.getStravaByAthleteId(athleteId);
-        return strava.getActivity(activityId);
-    }
-
-    public boolean verifySubscriptionToken(String verificationToken) {
-        if (verificationToken == null) {
-            return false;
-        }
-
-        return verificationToken.equals(subscriptionVerificationToken);
+        return strava(athleteId).getActivity(activityId);
     }
 
     public String getAuthorizeUrl() {
-        return this.stravaAuthenticationService.getAuthorizeUrl();
+        return stravaConfig.getAuthorizeUrl();
     }
 }

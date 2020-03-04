@@ -23,8 +23,17 @@ public class StravaConfig {
     @Value("${strava.oauth.grant-type}")
     private String grantType;
 
-    @Value("${strava.api.code}")
-    private String code;
+    @Value("${strava.oauth.authorize-url}")
+    private String authorizeUrl;
+
+    @Value("${strava.oauth.authorize-redirect-url}")
+    private String authorizeRedirectUrl;
+
+    public String getAuthorizeUrl() {
+        return authorizeUrl
+                .replace("{clientId}", String.valueOf(getClientId()))
+                .replace("{redirectUri}", this.authorizeRedirectUrl);
+    }
 
     @Bean
     public AuthorisationService authorisationService() {
@@ -49,9 +58,5 @@ public class StravaConfig {
 
     public String getGrantType() {
         return grantType;
-    }
-
-    public String getCode() {
-        return code;
     }
 }
