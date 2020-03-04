@@ -8,10 +8,7 @@ import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
@@ -27,21 +24,28 @@ public class StravaController {
         this.stravaApiService = stravaApiService;
     }
 
-    @GetMapping("/authorize")
-    public RedirectView redirectWithUsingRedirectView() {
+    @GetMapping("/register")
+    public RedirectView register() {
         return new RedirectView(stravaApiService.getAuthorizeUrl());
     }
 
-    @GetMapping("/code")
-    public void code(@RequestParam("code") String code) {
-        System.out.println("code: " + code);
+    @GetMapping("/auth")
+    @ResponseStatus(HttpStatus.OK)
+    public void auth(@RequestParam("code") String code) {
+        mattermostService.postAddRequest(code);
+    }
+
+    @GetMapping("/add")
+    @ResponseStatus(HttpStatus.OK)
+    public void add(@RequestParam("code") String code) {
+        stravaApiService.registerAthlete(code);
     }
 
     @PostMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
     public void event(@RequestBody StravaEventRequestDTO request) {
         if (StravaObjectTypeDTO.activity.equals(request.getObjectType())) {
-            this.mattermostService.postActivity(stravaApiService.getActivity(request.getObjectId()));
+            this.mattermostService.postActivity(stravaApiService.getActivityForAthlete(request.getObjectId(), request.getOwnerId().intValue()));
         }
     }
 

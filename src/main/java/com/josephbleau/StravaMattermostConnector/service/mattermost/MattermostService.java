@@ -27,6 +27,9 @@ public class MattermostService {
     @Value("${mattermost.channel}")
     private String mmChannel;
 
+    @Value("${connector.approval-url}")
+    private String approvalUrl;
+
     private final RestTemplate restTemplate;
 
     @Autowired
@@ -34,17 +37,27 @@ public class MattermostService {
         this.restTemplate = restTemplate;
     }
 
-    public void postActivity(StravaActivity activity) {
-        String url = mmUrl + ":" + mmPort + "/hooks/" + mmWebhookToken;
+    private String getWebhookUrl() {
+        return mmUrl + ":" + mmPort + "/hooks/" + mmWebhookToken;
+    }
 
+    private MattermostPayloadDTO simpleTextPayload(String message) {
         MattermostPayloadDTO mmPayload = new MattermostPayloadDTO();
         mmPayload.setChannel(this.mmChannel);
         mmPayload.setUsername(this.mmUsername);
         mmPayload.setIcon_url(this.mmUserIconUrl);
-        mmPayload.setText(activity.getName());
+        mmPayload.setText(message);
+        return mmPayload;
+    }
 
-        ResponseEntity<Object> response = this.restTemplate.postForEntity(url, mmPayload, Object.class);
+    public void postActivity(StravaActivity activity) {
+        this.restTemplate.postForEntity(getWebhookUrl(), simpleTextPayload(activity.getName()), Object.class);
+    }
 
-        System.out.println(response.getStatusCode());
+    public void postAddRequest(String code) {
+        String message = "An athlete has requested to have their activities shared with this channel, click this link to approve: " +
+                         approvalUrl + "?code=" + code;
+
+        this.restTemplate.postForEntity(getWebhookUrl(), simpleTextPayload(message), Object.class);
     }
 }
