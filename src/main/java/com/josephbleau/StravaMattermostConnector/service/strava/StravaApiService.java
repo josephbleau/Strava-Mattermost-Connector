@@ -3,7 +3,6 @@ package com.josephbleau.StravaMattermostConnector.service.strava;
 import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
 import javastrava.auth.TokenManager;
 import javastrava.auth.model.Token;
-import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
 import javastrava.service.Strava;
 import org.springframework.beans.factory.annotation.Autowired;
