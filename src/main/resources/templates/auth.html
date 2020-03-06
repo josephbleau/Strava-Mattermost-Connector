@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Strava Mattermost Connector</title>
@@ -21,7 +21,7 @@
         <p>A message should have been sent to your mattermost server. This message will contain a link that allows you to complete this registration.</p>
 
         <div class="text-center" style="margin: 50px;">
-            <a href="#{url}">
+            <a th:href=${url}>
                 <button type="button" class="btn btn-primary btn-lg btn-block">Open Mattermost</button>
             </a>
         </div>

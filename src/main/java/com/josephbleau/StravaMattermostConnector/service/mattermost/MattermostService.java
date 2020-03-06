@@ -57,11 +57,12 @@ public class MattermostService {
         String message = "An athlete has requested to have their activities shared with this channel, click this link to approve: " +
                          approvalUrl + "?code=" + code;
 
-        this.restTemplate.postForEntity(getWebhookUrl(), simpleTextPayload(message), Object.class);
+        this.restTemplate.postForLocation(getWebhookUrl(), simpleTextPayload(message));
     }
 
     // TODO: Implement per-user MM URL and channel configuration which will be set-up on registration
     public String getMattermostChannelUrlForAthlete(int athleteId) {
-        return mmUrl + "channels/running";
+        // URL + Port + TeamName + /channels + ChannelName
+        return mmUrl + ":" + mmPort + "/test/channels/running";
     }
 }

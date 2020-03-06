@@ -43,7 +43,9 @@ public class StravaController {
      * Callback that is invoked when a user authorizes our application.
      */
     @GetMapping("/auth")
-    public String auth(@RequestParam("code") String code, Model model) {
+    public String auth(Model model,
+                       @RequestParam("code") String code,
+                       @RequestParam("scope") String scope) {
         mattermostService.postAddRequest(code);
         model.addAttribute("url", mattermostService.getMattermostChannelUrlForAthlete(0));
         return "auth";

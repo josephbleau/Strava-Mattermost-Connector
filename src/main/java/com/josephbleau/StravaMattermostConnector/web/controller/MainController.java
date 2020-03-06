@@ -1,4 +1,4 @@
-package com.josephbleau.StravaMattermostConnector.web;
+package com.josephbleau.StravaMattermostConnector.web.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
