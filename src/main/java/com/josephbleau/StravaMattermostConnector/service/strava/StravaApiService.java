@@ -3,6 +3,7 @@ package com.josephbleau.StravaMattermostConnector.service.strava;
 import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
 import javastrava.auth.TokenManager;
 import javastrava.auth.model.Token;
+import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
 import javastrava.service.Strava;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class StravaApiService {
 
     private Strava strava(int athleteId) {
         TokenManager tokenManager = TokenManager.instance();
-        Token token = tokenManager.retrieveTokenWithExactScope(athleteId, new ArrayList<>());
+        Token token = tokenManager.retrieveTokenWithExactScope(athleteId, new AuthorisationScope[]{AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.ACTIVITY_READ});
         return new Strava(token);
     }
 
