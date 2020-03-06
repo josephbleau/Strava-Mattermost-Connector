@@ -55,9 +55,9 @@ public class StravaController {
      * Called when a user from matter-most verifies a registration.
      */
     @GetMapping("/add")
-    @ResponseStatus(HttpStatus.OK)
-    public void add(@RequestParam("code") String code) {
+    public String add(@RequestParam("code") String code) {
         registrationService.registerAthlete(code);
+        return "added";
     }
 
     /**
