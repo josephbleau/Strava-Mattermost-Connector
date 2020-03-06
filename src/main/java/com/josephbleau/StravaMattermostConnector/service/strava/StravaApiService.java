@@ -22,8 +22,10 @@ public class StravaApiService {
     }
 
     private Strava strava(int athleteId) {
+        System.out.println("Creating strava() for athlete: " + athleteId);
+
         TokenManager tokenManager = TokenManager.instance();
-        Token token = tokenManager.retrieveTokenWithScope(athleteId, new AuthorisationScope[]{AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ});
+        Token token = tokenManager.retrieveTokenWithScope(athleteId, AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ);
         return new Strava(token);
     }
 
