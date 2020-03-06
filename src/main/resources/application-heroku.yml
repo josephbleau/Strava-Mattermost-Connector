@@ -38,3 +38,5 @@ spring:
   h2:
     console:
       enabled: true
+  redis:
+    url: ${REDIS_URL}

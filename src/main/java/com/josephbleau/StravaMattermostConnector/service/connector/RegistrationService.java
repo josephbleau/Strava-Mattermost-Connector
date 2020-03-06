@@ -1,23 +1,22 @@
 package com.josephbleau.StravaMattermostConnector.service.connector;
 
 import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
-import com.josephbleau.StravaMattermostConnector.model.PersistedToken;
-import com.josephbleau.StravaMattermostConnector.repository.PersistedTokenRepository;
 import javastrava.auth.AuthorisationService;
 import javastrava.auth.impl.AuthorisationServiceImpl;
 import javastrava.auth.model.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.JedisPool;
 
 @Service
 public class RegistrationService {
     private StravaConfig stravaConfig;
-    private PersistedTokenRepository persistedTokenRepository;
+    private JedisPool jedisPool;
 
     @Autowired
-    public RegistrationService(StravaConfig stravaConfig, PersistedTokenRepository persistedTokenRepository) {
+    public RegistrationService(StravaConfig stravaConfig,JedisPool jedisPool) {
         this.stravaConfig = stravaConfig;
-        this.persistedTokenRepository = persistedTokenRepository;
+        this.jedisPool = jedisPool;
     }
 
     public void registerAthlete(String code) {
@@ -29,6 +28,6 @@ public class RegistrationService {
                 code
         );
 
-        persistedTokenRepository.save(new PersistedToken(token.getAthlete().getId(), token.getToken()));
+        jedisPool.getResource().set(String.valueOf(token.getAthlete().getId()), token.getToken());
     }
 }
