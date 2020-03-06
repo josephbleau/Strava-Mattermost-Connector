@@ -23,7 +23,7 @@ public class StravaApiService {
 
     private Strava strava(int athleteId) {
         TokenManager tokenManager = TokenManager.instance();
-        Token token = tokenManager.retrieveTokenWithExactScope(athleteId, new AuthorisationScope[]{AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.ACTIVITY_READ});
+        Token token = tokenManager.retrieveTokenWithScope(athleteId, new AuthorisationScope[]{AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ});
         return new Strava(token);
     }
 
