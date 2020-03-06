@@ -10,6 +10,7 @@ import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -42,9 +43,10 @@ public class StravaController {
      * Callback that is invoked when a user authorizes our application.
      */
     @GetMapping("/auth")
-    @ResponseStatus(HttpStatus.OK)
-    public void auth(@RequestParam("code") String code) {
+    public String auth(@RequestParam("code") String code, Model model) {
         mattermostService.postAddRequest(code);
+        model.addAttribute("url", mattermostService.getMattermostChannelUrlForAthlete(0));
+        return "auth";
     }
 
     /**

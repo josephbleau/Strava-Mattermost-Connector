@@ -59,4 +59,9 @@ public class MattermostService {
 
         this.restTemplate.postForEntity(getWebhookUrl(), simpleTextPayload(message), Object.class);
     }
+
+    // TODO: Implement per-user MM URL and channel configuration which will be set-up on registration
+    public String getMattermostChannelUrlForAthlete(int athleteId) {
+        return mmUrl + "channels/running";
+    }
 }
