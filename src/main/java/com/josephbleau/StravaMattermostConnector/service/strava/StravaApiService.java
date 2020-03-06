@@ -31,6 +31,7 @@ public class StravaApiService {
         Token token = new Token();
         token.setScopes(Arrays.asList(AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ));
         token.setToken(jedis.get(String.valueOf(athleteId)));
+        token.setTokenType("Bearer");
 
         StravaAthlete stravaAthlete = new StravaAthlete();
         stravaAthlete.setId(athleteId);
