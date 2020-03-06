@@ -13,7 +13,6 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.Arrays;
 import java.util.Set;
-import java.util.logging.Logger;
 
 @Component
 public class TokenLoader implements ApplicationListener<ContextRefreshedEvent> {
@@ -33,8 +32,6 @@ public class TokenLoader implements ApplicationListener<ContextRefreshedEvent> {
 
         for (String athleteIdAsString : keys) {
             String persistedToken = jedis.get(athleteIdAsString);
-            System.out.println("Loading athlete: " + athleteIdAsString);
-            System.out.println("Found token: " + persistedToken);
 
             Token token = new Token();
             token.setToken(persistedToken);

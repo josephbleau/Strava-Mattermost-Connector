@@ -1,31 +1,38 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
 import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
-import javastrava.auth.TokenManager;
 import javastrava.auth.model.Token;
 import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
+import javastrava.model.StravaAthlete;
 import javastrava.service.Strava;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 @Service
 public class StravaApiService {
 
     private StravaConfig stravaConfig;
+    private JedisPool jedisPool;
 
     @Autowired
-    public StravaApiService(StravaConfig stravaConfig) {
+    public StravaApiService(StravaConfig stravaConfig, JedisPool jedisPool) {
         this.stravaConfig = stravaConfig;
+        this.jedisPool = jedisPool;
     }
 
     private Strava strava(int athleteId) {
-        System.out.println("Creating strava() for athlete: " + athleteId);
+        Jedis jedis = jedisPool.getResource();
+        Token token = new Token();
+        token.setScopes(Arrays.asList(AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ));
+        token.setToken(jedis.get(String.valueOf(athleteId)));
+        StravaAthlete stravaAthlete = new StravaAthlete();
+        stravaAthlete.setId(athleteId);
 
-        TokenManager tokenManager = TokenManager.instance();
-        Token token = tokenManager.retrieveTokenWithScope(athleteId, AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ);
         return new Strava(token);
     }
 
