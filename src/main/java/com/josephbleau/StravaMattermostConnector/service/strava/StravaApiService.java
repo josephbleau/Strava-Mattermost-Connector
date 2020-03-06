@@ -27,11 +27,15 @@ public class StravaApiService {
 
     private Strava strava(int athleteId) {
         Jedis jedis = jedisPool.getResource();
+
         Token token = new Token();
         token.setScopes(Arrays.asList(AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ));
         token.setToken(jedis.get(String.valueOf(athleteId)));
+
         StravaAthlete stravaAthlete = new StravaAthlete();
         stravaAthlete.setId(athleteId);
+
+        token.setAthlete(stravaAthlete);
 
         return new Strava(token);
     }
