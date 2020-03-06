@@ -50,7 +50,7 @@ public class MattermostService {
     }
 
     public void postActivity(StravaActivity activity) {
-        this.restTemplate.postForEntity(getWebhookUrl(), simpleTextPayload(activity.getName()), Object.class);
+        this.restTemplate.postForLocation(getWebhookUrl(), simpleTextPayload(activity.getName()));
     }
 
     public void postAddRequest(String code) {
