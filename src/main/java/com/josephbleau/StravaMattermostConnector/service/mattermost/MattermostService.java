@@ -37,11 +37,8 @@ public class MattermostService {
     }
 
     public void postActivity(StravaActivity activity) {
-        int athleteId = activity.getAthlete().getId();
-        String url = userDetailsRepository.getUser(athleteId).getMattermostDetails().getWebookUrl();
-        String payload = activity.getName();
-
-        this.restTemplate.postForLocation(url, payload);
+        String athleteId = String.valueOf(activity.getAthlete().getId());
+        this.restTemplate.postForLocation(getMattermostPostEndpoint(athleteId), activity.getName());
     }
 
     public void postAddRequest(String code) {
