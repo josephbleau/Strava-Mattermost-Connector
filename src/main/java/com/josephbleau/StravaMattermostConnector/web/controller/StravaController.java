@@ -56,7 +56,7 @@ public class StravaController {
                        @RequestParam("scope") String scope) {
         registrationService.registerTempUser(code);
         mattermostService.postAddRequest(code);
-        model.addAttribute("url", userDetailsRepository.getUser(code).getMattermostDetails().getWebookUrl());
+        model.addAttribute("url", userDetailsRepository.getUser(code).getMattermostDetails().getChannelUrl());
         return "auth";
     }
 
