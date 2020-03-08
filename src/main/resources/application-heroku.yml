@@ -2,7 +2,8 @@ mattermost:
   url: ${MATTERMOST_URL}
   port: 80
   hook-token: ${HOOK_TOKEN}
-  channel: Running
+  team-name: test
+  channel-name: Running
   user:
     name: StravaBot
     icon-url: https://strava-mattermost-connector.herokuapp.com/img/user_icon.png

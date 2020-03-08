@@ -18,6 +18,7 @@ public class RegistrationService {
     private String host;
     private int port;
     private String hookToken;
+    private String teamName;
     private String channelName;
 
     @Autowired
@@ -27,12 +28,14 @@ public class RegistrationService {
             @Value("${mattermost.url}") String host,
             @Value("${mattermost.port}") int port,
             @Value("${mattermost.hook-token}") String hookToken,
-            @Value("${mattermost.channel}") String channelName) {
+            @Value("${mattermost.team-name}") String teamName,
+            @Value("${mattermost.channel-name}") String channelName) {
         this.stravaConfig = stravaConfig;
         this.userDetailsRepository = userDetailsRepository;
         this.host = host;
         this.port = port;
         this.hookToken = hookToken;
+        this.teamName = teamName;
         this.channelName = channelName;
     }
 
@@ -43,6 +46,7 @@ public class RegistrationService {
                 host,
                 port,
                 hookToken,
+                teamName,
                 channelName
         );
     }
@@ -63,6 +67,7 @@ public class RegistrationService {
                 host,
                 port,
                 hookToken,
+                teamName,
                 channelName
         );
     }

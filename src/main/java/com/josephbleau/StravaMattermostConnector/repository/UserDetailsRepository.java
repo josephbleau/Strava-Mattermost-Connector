@@ -16,7 +16,7 @@ public class UserDetailsRepository {
     private JedisPool jedisPool;
 
     private String[] userDetailFields = new String[]{
-            "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:channel-name"
+            "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:team-name", "mattermost:channel-name"
     };
 
     @Autowired
@@ -24,7 +24,7 @@ public class UserDetailsRepository {
         this.jedisPool = jedisPool;
     }
 
-    public void saveUser(String athleteKey, String stravaApiToken, String mattermostHost, int mattermostPort, String mattermostHookToken, String mattermostChannelName) {
+    public void saveUser(String athleteKey, String stravaApiToken, String mattermostHost, int mattermostPort, String mattermostHookToken, String mattermostTeamName, String mattermostChannelName) {
         Map<String, String> userDetails = new HashMap<>();
 
         // Temp users wont have this yet, so don't send it.
@@ -35,13 +35,14 @@ public class UserDetailsRepository {
         userDetails.put(userDetailFields[1], mattermostHost);
         userDetails.put(userDetailFields[2], String.valueOf(mattermostPort));
         userDetails.put(userDetailFields[3], mattermostHookToken);
-        userDetails.put(userDetailFields[4], mattermostChannelName);
+        userDetails.put(userDetailFields[4], mattermostTeamName);
+        userDetails.put(userDetailFields[5], mattermostChannelName);
 
         jedisPool.getResource().hmset("user:"+ athleteKey, userDetails);
     }
 
-    public void saveUser(int athleteId, String stravaApiToken, String mattermostHost, int mattermostPort, String mattermostHookToken, String mattermostChannelName) {
-        saveUser(String.valueOf(athleteId), stravaApiToken, mattermostHost, mattermostPort, mattermostHookToken, mattermostChannelName);
+    public void saveUser(int athleteId, String stravaApiToken, String mattermostHost, int mattermostPort, String mattermostHookToken, String mattermostTeamName, String mattermostChannelName) {
+        saveUser(String.valueOf(athleteId), stravaApiToken, mattermostHost, mattermostPort, mattermostHookToken, mattermostTeamName, mattermostChannelName);
     }
 
     public UserDetails getUser(String athleteKey) {
@@ -51,7 +52,8 @@ public class UserDetailsRepository {
                 userDetailValues.get(1),
                 Integer.parseInt(userDetailValues.get(2)),
                 userDetailValues.get(3),
-                userDetailValues.get(4)
+                userDetailValues.get(4),
+                userDetailValues.get(5)
         );
 
         StravaApiDetails stravaApiDetails = new StravaApiDetails(userDetailValues.get(0));
