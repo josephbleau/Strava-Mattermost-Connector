@@ -3,6 +3,8 @@ package com.josephbleau.StravaMattermostConnector.service.strava;
 import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
+import javastrava.auth.AuthorisationService;
+import javastrava.auth.impl.AuthorisationServiceImpl;
 import javastrava.auth.model.Token;
 import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
@@ -26,7 +28,7 @@ public class StravaApiService {
     }
 
     private Strava strava(int athleteId) {
-        UserDetails userDetails = userDetailsRepository.getUser(athleteId);
+        UserDetails userDetails = userDetailsRepository.getUser(String.valueOf(athleteId));
 
         Token token = new Token();
         token.setScopes(Arrays.asList(AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ));
@@ -39,6 +41,18 @@ public class StravaApiService {
         token.setAthlete(stravaAthlete);
 
         return new Strava(token);
+    }
+
+    public Token exchangeCodeForToken(String code) {
+        AuthorisationService authorisationService = new AuthorisationServiceImpl();
+
+        Token token = authorisationService.tokenExchange(
+                stravaConfig.getClientId(),
+                stravaConfig.getClientSecret(),
+                code
+        );
+
+        return token;
     }
 
     public StravaActivity getActivityForAthlete(long activityId, int athleteId) {

@@ -41,11 +41,13 @@ public class MattermostService {
         this.restTemplate.postForLocation(getMattermostPostEndpoint(athleteId), simpleTextPayload(athleteId, activity.getName()));
     }
 
-    public void postAddRequest(String code) {
-        String message = "An athlete has requested to have their activities shared with this channel, click this link to approve: " +
-                         approvalUrl + "?code=" + code;
+    public void postAddRequest(String athleteKey, String code) {
+        String message = "An athlete has requested to have their activities shared with this channel, click this link to approve: %s?code=%s&athleteKey=%s";
 
-        this.restTemplate.postForLocation(getMattermostPostEndpoint(code), simpleTextPayload(code, message));
+        String endpoint = getMattermostPostEndpoint(athleteKey);
+        MattermostPayloadDTO payload = simpleTextPayload(athleteKey, String.format(message, approvalUrl, code, athleteKey));
+
+        this.restTemplate.postForLocation(endpoint, payload);
     }
 
     private String getMattermostPostEndpoint(String athleteKey) {

@@ -1,7 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.web.controller;
 
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
-import com.josephbleau.StravaMattermostConnector.service.connector.RegistrationService;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
 import com.josephbleau.StravaMattermostConnector.service.strava.StravaApiService;
 import com.josephbleau.StravaMattermostConnector.service.strava.StravaSubscriptionService;
@@ -11,9 +10,7 @@ import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @RequestMapping("/strava")
@@ -22,51 +19,17 @@ public class StravaController {
     private MattermostService mattermostService;
     private StravaApiService stravaApiService;
     private StravaSubscriptionService stravaSubscriptionService;
-    private RegistrationService registrationService;
     private UserDetailsRepository userDetailsRepository;
 
     @Autowired
     public StravaController(
             MattermostService mattermostService,
             StravaApiService stravaApiService,
-            StravaSubscriptionService stravaSubscriptionService,
-            RegistrationService registrationService,
-            UserDetailsRepository userDetailsRepository) {
+            StravaSubscriptionService stravaSubscriptionService, UserDetailsRepository userDetailsRepository) {
         this.mattermostService = mattermostService;
         this.stravaApiService = stravaApiService;
         this.stravaSubscriptionService = stravaSubscriptionService;
-        this.registrationService = registrationService;
         this.userDetailsRepository = userDetailsRepository;
-    }
-
-    /**
-     * Redirect the user to the Strava app authorization view.
-     */
-    @GetMapping("/register")
-    public RedirectView register() {
-        return new RedirectView(stravaApiService.getAuthorizeUrl());
-    }
-
-    /**
-     * Callback that is invoked when a user authorizes our application.
-     */
-    @GetMapping("/auth")
-    public String auth(Model model,
-                       @RequestParam("code") String code,
-                       @RequestParam("scope") String scope) {
-        registrationService.registerTempUser(code);
-        mattermostService.postAddRequest(code);
-        model.addAttribute("url", userDetailsRepository.getUser(code).getMattermostDetails().getChannelUrl());
-        return "auth";
-    }
-
-    /**
-     * Called when a user from matter-most verifies a registration.
-     */
-    @GetMapping("/add")
-    public String add(@RequestParam("code") String code) {
-        registrationService.registerAthlete(code);
-        return "added";
     }
 
     /**
@@ -76,7 +39,9 @@ public class StravaController {
     @ResponseStatus(HttpStatus.OK)
     public void event(@RequestBody StravaEventRequestDTO request) {
         if (StravaObjectTypeDTO.activity.equals(request.getObjectType())) {
-            this.mattermostService.postActivity(stravaApiService.getActivityForAthlete(request.getObjectId(), request.getOwnerId().intValue()));
+            if (userDetailsRepository.getUser(String.valueOf(request.getOwnerId())).isVerified()) {
+                mattermostService.postActivity(stravaApiService.getActivityForAthlete(request.getObjectId(), request.getOwnerId().intValue()));
+            }
         }
     }
 

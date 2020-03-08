@@ -1,9 +1,4 @@
 mattermost:
-  url: ${MATTERMOST_URL}
-  port: 80
-  hook-token: ${HOOK_TOKEN}
-  team-name: test
-  channel-name: Running
   user:
     name: StravaBot
     icon-url: https://strava-mattermost-connector.herokuapp.com/img/user_icon.png
@@ -23,10 +18,10 @@ strava:
       client-secret: ${CLIENT_SECRET}
       refresh-token: ${REFRESH_TOKEN}
       authorize-url: https://www.strava.com/oauth/authorize?client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}&scope=activity:read_all
-      authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/strava/auth
+      authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/registration/step2
 
 connector:
-  approval-url: https://strava-mattermost-connector.herokuapp.com/strava/add
+  approval-url: https://strava-mattermost-connector.herokuapp.com/registration/step4
 
 spring:
   redis:

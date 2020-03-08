@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Strava Mattermost Connector</title>
@@ -14,19 +14,12 @@
 </head>
 <body>
 <div class="row'">
-    <div class="col-md-4"></div>
-    <div class="col-md-4">
+    <div class="col-md-12">
         <h1>Strava Mattermost Connector</h1>
-        <h3>You have successfully authorized our application with Strava.</h3>
-        <p>A message should have been sent to your mattermost server. This message will contain a link that allows you to complete this registration.</p>
-
-        <div class="text-center" style="margin: 50px;">
-            <a th:href=${url}>
-                <button type="button" class="btn btn-primary btn-lg btn-block">Open Mattermost</button>
-            </a>
-        </div>
+        <h3>You have successfully registered with the Strava Mattermost Connector</h3>
+        <p>New activities on your feed will now automatically be posted to the mattermost channel. If you wish to stop this from happening you can
+        revoke the applications privileges in your <a href="https://www.strava.com/settings/apps">Strava Settings</a></p>
     </div>
-    <div class="col-md-4"></div>
 </div>
 </body>
 </html>

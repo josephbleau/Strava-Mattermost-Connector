@@ -5,6 +5,7 @@ import com.josephbleau.StravaMattermostConnector.model.StravaApiDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.HashMap;
@@ -16,7 +17,7 @@ public class UserDetailsRepository {
     private JedisPool jedisPool;
 
     private String[] userDetailFields = new String[]{
-            "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:team-name", "mattermost:channel-name"
+            "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:team-name", "mattermost:channel-name", "mattermost:user-name"
     };
 
     @Autowired
@@ -24,48 +25,63 @@ public class UserDetailsRepository {
         this.jedisPool = jedisPool;
     }
 
-    public void saveUser(String athleteKey, String stravaApiToken, String mattermostHost, int mattermostPort, String mattermostHookToken, String mattermostTeamName, String mattermostChannelName) {
-        Map<String, String> userDetails = new HashMap<>();
+    public void saveUser(UserDetails userDetails) {
+        Map<String, String> userDetailsMap = new HashMap<>();
 
-        // Temp users wont have this yet, so don't send it.
-        if (stravaApiToken != null) {
-            userDetails.put(userDetailFields[0], stravaApiToken);
+        if (userDetails == null) {
+            throw new NullPointerException("UserDetails cannot be null.");
         }
 
-        userDetails.put(userDetailFields[1], mattermostHost);
-        userDetails.put(userDetailFields[2], String.valueOf(mattermostPort));
-        userDetails.put(userDetailFields[3], mattermostHookToken);
-        userDetails.put(userDetailFields[4], mattermostTeamName);
-        userDetails.put(userDetailFields[5], mattermostChannelName);
+        if (userDetails.getMattermostDetails() == null) {
+            throw new NullPointerException("MattermostDetails inside of UserDetails cannot be null.");
+        }
 
-        jedisPool.getResource().hmset("user:"+ athleteKey, userDetails);
-    }
+        if (userDetails.getStravaApiDetails() == null) {
+            throw new NullPointerException("StravaApiDetails insode of UserDetails cannot be null.");
+        }
 
-    public void saveUser(int athleteId, String stravaApiToken, String mattermostHost, int mattermostPort, String mattermostHookToken, String mattermostTeamName, String mattermostChannelName) {
-        saveUser(String.valueOf(athleteId), stravaApiToken, mattermostHost, mattermostPort, mattermostHookToken, mattermostTeamName, mattermostChannelName);
+        userDetailsMap.put(userDetailFields[0], String.valueOf(userDetails.isVerified()));
+        userDetailsMap.put(userDetailFields[1], userDetails.getStravaApiDetails().getToken());
+        userDetailsMap.put(userDetailFields[2], userDetails.getMattermostDetails().getHost());
+        userDetailsMap.put(userDetailFields[3], userDetails.getMattermostDetails().getPort());
+        userDetailsMap.put(userDetailFields[4], userDetails.getMattermostDetails().getHookToken());
+        userDetailsMap.put(userDetailFields[5], userDetails.getMattermostDetails().getTeamName());
+        userDetailsMap.put(userDetailFields[6], userDetails.getMattermostDetails().getChannelName());
+        userDetailsMap.put(userDetailFields[7], userDetails.getMattermostDetails().getUserName());
+
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.hmset("user:" + userDetails.getAthleteKey(), userDetailsMap);
+        }
     }
 
     public UserDetails getUser(String athleteKey) {
-        List<String> userDetailValues = jedisPool.getResource().hmget("user:" + athleteKey, userDetailFields);
+        try (Jedis jedis = jedisPool.getResource()) {
+            List<String> userDetailValues = jedis.hmget("user:" + athleteKey, userDetailFields);
 
-        MattermostDetails mattermostDetails = new MattermostDetails(
-                userDetailValues.get(1),
-                Integer.parseInt(userDetailValues.get(2)),
-                userDetailValues.get(3),
-                userDetailValues.get(4),
-                userDetailValues.get(5)
-        );
+            if (userDetailValues == null || userDetailValues.size() < userDetailFields.length) {
+                return null;
+            }
 
-        StravaApiDetails stravaApiDetails = new StravaApiDetails(userDetailValues.get(0));
+            MattermostDetails mattermostDetails = new MattermostDetails(
+                    userDetailValues.get(2),
+                    userDetailValues.get(3),
+                    userDetailValues.get(4),
+                    userDetailValues.get(5),
+                    userDetailValues.get(6),
+                    userDetailValues.get(7)
+            );
 
-        return new UserDetails(athleteKey, stravaApiDetails, mattermostDetails);
-    }
+            StravaApiDetails stravaApiDetails = new StravaApiDetails(userDetailValues.get(1));
 
-    public UserDetails getUser(int athleteId) {
-        return getUser(String.valueOf(athleteId));
+            Boolean verified = Boolean.valueOf(userDetailValues.get(0));
+
+            return new UserDetails(athleteKey, verified, stravaApiDetails, mattermostDetails);
+        }
     }
 
     public void deleteUser(String athleteKey) {
-        jedisPool.getResource().del("user:" + athleteKey);
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.del("user:" + athleteKey);
+        }
     }
 }

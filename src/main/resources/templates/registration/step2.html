@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Strava Mattermost Connector</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="row'">
+    <div class="col-md-12">
+        <h1>Strava Mattermost Connector</h1>
+        <h3>You have successfully authorized our application with Strava.</h3>
+        <p>The next step in the process is for us to setup your Mattermost integration settings.</p>
+        <form action="#" th:action="${nextStep}" method="post" th:object="${mattermostDetails}">
+            <div class="form-group">
+                <label for="mattermostUserName">Mattermost User Name</label>
+                <input type="text" class="form-control" id="mattermostUserName" th:value="${mattermostDetails.userName}" th:field="*{userName}">
+
+                <label for="mattermostHost">Mattermost Hostname</label>
+                <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
+
+                <label for="mattermostPort">Mattermost Port</label>
+                <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
+
+                <label for="mattermostTeamName">Mattermost Team Name</label>
+                <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
+
+                <label for="mattermostChannelName">Mattermost Channel Name</label>
+                <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
+
+                <label for="mattermostHookToken">Mattermost Hook Token</label>
+                <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
+
+<!--                <div class="form-check">-->
+<!--                    <label>Which activity types would you like to share?</label> </br>-->
+
+<!--                    <input class="form-check-input" type="checkbox" value="" id="stravaActivyTypeRunning">-->
+<!--                    <label for="stravaActivyTypeRunning">Running</label>-->
+
+<!--                    <input class="form-check-input" type="checkbox" value="" id="stravaActivyTypeBiking">-->
+<!--                    <label for="stravaActivyTypeBiking">Biking</label>-->
+
+<!--                    <input class="form-check-input" type="checkbox" value="" id="stravaActivityTypeSwimming">-->
+<!--                    <label for="stravaActivityTypeSwimming">Swimming</label>-->
+<!--                </div>-->
+                <button type="submit" class="btn btn-primary btn-lg">Looks good, let's continue...</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
