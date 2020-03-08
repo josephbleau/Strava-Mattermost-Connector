@@ -53,7 +53,7 @@ public class RegistrationController {
             model.addAttribute("mattermostDetails", userDetailsRepository.getUser(athleteKey).getMattermostDetails());
         }
 
-        return "/registration/step2";
+        return "registration/step2";
     }
 
     @PostMapping("/step3")
@@ -74,7 +74,7 @@ public class RegistrationController {
         userDetailsRepository.saveUser(userDetails);
         mattermostService.postAddRequest(athleteKey, code);
 
-        return "/registration/step3";
+        return "registration/step3";
     }
 
     /**
@@ -85,7 +85,7 @@ public class RegistrationController {
         UserDetails userDetails = userDetailsRepository.getUser(athleteKey);
         userDetails.setVerified(true);
         userDetailsRepository.saveUser(userDetails);
-        return "/registration/step4";
+        return "registration/step4";
     }
 
     /**
