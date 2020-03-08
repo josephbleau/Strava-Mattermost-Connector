@@ -1,5 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.service.mattermost;
 
+import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import javastrava.model.StravaActivity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,41 +9,27 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class MattermostService {
-    @Value("${mattermost.url}")
-    private String mmUrl;
-
-    @Value("${mattermost.port}")
-    private String mmPort;
-
-    @Value("${mattermost.hook-token}")
-    private String mmWebhookToken;
-
     @Value("${mattermost.user.name}")
     private String mmUsername;
 
     @Value("${mattermost.user.icon-url}")
     private String mmUserIconUrl;
 
-    @Value("${mattermost.channel}")
-    private String mmChannel;
-
     @Value("${connector.approval-url}")
     private String approvalUrl;
 
     private final RestTemplate restTemplate;
+    private UserDetailsRepository userDetailsRepository;
 
     @Autowired
-    public MattermostService(RestTemplate restTemplate) {
+    public MattermostService(RestTemplate restTemplate, UserDetailsRepository userDetailsRepository) {
         this.restTemplate = restTemplate;
+        this.userDetailsRepository = userDetailsRepository;
     }
 
-    private String getWebhookUrl() {
-        return mmUrl + ":" + mmPort + "/hooks/" + mmWebhookToken;
-    }
-
-    private MattermostPayloadDTO simpleTextPayload(String message) {
+    private MattermostPayloadDTO simpleTextPayload(String athleteKey, String message) {
         MattermostPayloadDTO mmPayload = new MattermostPayloadDTO();
-        mmPayload.setChannel(this.mmChannel);
+        mmPayload.setChannel(userDetailsRepository.getUser(athleteKey).getMattermostDetails().getChannelName());
         mmPayload.setUsername(this.mmUsername);
         mmPayload.setIcon_url(this.mmUserIconUrl);
         mmPayload.setText(message);
@@ -50,19 +37,21 @@ public class MattermostService {
     }
 
     public void postActivity(StravaActivity activity) {
-        this.restTemplate.postForLocation(getWebhookUrl(), simpleTextPayload(activity.getName()));
+        int athleteId = activity.getAthlete().getId();
+        String url = userDetailsRepository.getUser(athleteId).getMattermostDetails().getWebookUrl();
+        String payload = activity.getName();
+
+        this.restTemplate.postForLocation(url, payload);
     }
 
     public void postAddRequest(String code) {
         String message = "An athlete has requested to have their activities shared with this channel, click this link to approve: " +
                          approvalUrl + "?code=" + code;
 
-        this.restTemplate.postForLocation(getWebhookUrl(), simpleTextPayload(message));
+        this.restTemplate.postForLocation(getMattermostPostEndpoint(code), simpleTextPayload(code, message));
     }
 
-    // TODO: Implement per-user MM URL and channel configuration which will be set-up on registration
-    public String getMattermostChannelUrlForAthlete(int athleteId) {
-        // URL + Port + TeamName + /channels + ChannelName
-        return mmUrl + ":" + mmPort + "/test/channels/running";
+    private String getMattermostPostEndpoint(String athleteKey) {
+        return userDetailsRepository.getUser(athleteKey).getMattermostDetails().getWebookUrl();
     }
 }

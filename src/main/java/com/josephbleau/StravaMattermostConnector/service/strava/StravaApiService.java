@@ -1,6 +1,8 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
 import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
+import com.josephbleau.StravaMattermostConnector.model.UserDetails;
+import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import javastrava.auth.model.Token;
 import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
@@ -8,8 +10,6 @@ import javastrava.model.StravaAthlete;
 import javastrava.service.Strava;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.Arrays;
 
@@ -17,20 +17,20 @@ import java.util.Arrays;
 public class StravaApiService {
 
     private StravaConfig stravaConfig;
-    private JedisPool jedisPool;
+    private UserDetailsRepository userDetailsRepository;
 
     @Autowired
-    public StravaApiService(StravaConfig stravaConfig, JedisPool jedisPool) {
+    public StravaApiService(StravaConfig stravaConfig, UserDetailsRepository userDetailsRepository) {
         this.stravaConfig = stravaConfig;
-        this.jedisPool = jedisPool;
+        this.userDetailsRepository = userDetailsRepository;
     }
 
     private Strava strava(int athleteId) {
-        Jedis jedis = jedisPool.getResource();
+        UserDetails userDetails = userDetailsRepository.getUser(athleteId);
 
         Token token = new Token();
         token.setScopes(Arrays.asList(AuthorisationScope.ACTIVITY_READ_ALL, AuthorisationScope.READ));
-        token.setToken(jedis.get(String.valueOf(athleteId)));
+        token.setToken(userDetails.getStravaApiDetails().getToken());
         token.setTokenType("Bearer");
 
         StravaAthlete stravaAthlete = new StravaAthlete();

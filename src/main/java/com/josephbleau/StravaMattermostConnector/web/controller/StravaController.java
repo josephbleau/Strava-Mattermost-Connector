@@ -1,5 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.web.controller;
 
+import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import com.josephbleau.StravaMattermostConnector.service.connector.RegistrationService;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
 import com.josephbleau.StravaMattermostConnector.service.strava.StravaApiService;
@@ -22,13 +23,20 @@ public class StravaController {
     private StravaApiService stravaApiService;
     private StravaSubscriptionService stravaSubscriptionService;
     private RegistrationService registrationService;
+    private UserDetailsRepository userDetailsRepository;
 
     @Autowired
-    public StravaController(MattermostService mattermostService, StravaApiService stravaApiService, StravaSubscriptionService stravaSubscriptionService, RegistrationService registrationService) {
+    public StravaController(
+            MattermostService mattermostService,
+            StravaApiService stravaApiService,
+            StravaSubscriptionService stravaSubscriptionService,
+            RegistrationService registrationService,
+            UserDetailsRepository userDetailsRepository) {
         this.mattermostService = mattermostService;
         this.stravaApiService = stravaApiService;
         this.stravaSubscriptionService = stravaSubscriptionService;
         this.registrationService = registrationService;
+        this.userDetailsRepository = userDetailsRepository;
     }
 
     /**
@@ -46,8 +54,9 @@ public class StravaController {
     public String auth(Model model,
                        @RequestParam("code") String code,
                        @RequestParam("scope") String scope) {
+        registrationService.registerTempUser(code);
         mattermostService.postAddRequest(code);
-        model.addAttribute("url", mattermostService.getMattermostChannelUrlForAthlete(0));
+        model.addAttribute("url", userDetailsRepository.getUser(code).getMattermostDetails().getWebookUrl());
         return "auth";
     }
 
