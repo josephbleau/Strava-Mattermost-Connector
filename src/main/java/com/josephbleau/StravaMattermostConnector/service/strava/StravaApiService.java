@@ -59,6 +59,10 @@ public class StravaApiService {
         return strava(athleteId).getActivity(activityId);
     }
 
+    public StravaAthlete getAthlete(int athleteId) {
+        return strava(athleteId).getAthlete(athleteId);
+    }
+
     public String getAuthorizeUrl() {
         return stravaConfig.getAuthorizeUrl();
     }

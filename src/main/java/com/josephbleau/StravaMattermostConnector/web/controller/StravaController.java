@@ -7,6 +7,8 @@ import com.josephbleau.StravaMattermostConnector.service.strava.StravaSubscripti
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaEventRequestDTO;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaObjectTypeDTO;
 import com.josephbleau.StravaMattermostConnector.web.dto.StravaWebookChallengeResponseDTO;
+import javastrava.model.StravaActivity;
+import javastrava.model.StravaAthlete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -40,7 +42,10 @@ public class StravaController {
     public void event(@RequestBody StravaEventRequestDTO request) {
         if (StravaObjectTypeDTO.activity.equals(request.getObjectType())) {
             if (userDetailsRepository.getUser(String.valueOf(request.getOwnerId())).isVerified()) {
-                mattermostService.postActivity(stravaApiService.getActivityForAthlete(request.getObjectId(), request.getOwnerId().intValue()));
+                StravaActivity activity = stravaApiService.getActivityForAthlete(request.getObjectId(), request.getOwnerId().intValue());
+                StravaAthlete athlete = stravaApiService.getAthlete(request.getOwnerId().intValue());
+
+                mattermostService.postActivity(athlete, activity);
             }
         }
     }

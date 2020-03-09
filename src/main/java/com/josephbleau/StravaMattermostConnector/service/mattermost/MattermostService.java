@@ -2,10 +2,15 @@ package com.josephbleau.StravaMattermostConnector.service.mattermost;
 
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import javastrava.model.StravaActivity;
+import javastrava.model.StravaAthlete;
+import net.bis5.mattermost.client4.hook.IncomingWebhookClient;
+import net.bis5.mattermost.model.IncomingWebhookRequest;
+import net.bis5.mattermost.model.SlackAttachment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
 
 @Service
 public class MattermostService {
@@ -18,36 +23,76 @@ public class MattermostService {
     @Value("${connector.approval-url}")
     private String approvalUrl;
 
-    private final RestTemplate restTemplate;
     private UserDetailsRepository userDetailsRepository;
 
+    private static final String attachmentTemplate = "**Title: %s**\n" +
+            "\n" +
+            "* **Distance:** %.2f mi\n" +
+            "* **Pace:** %.2f mph\n" +
+            "* **Duration:** %dh %02dm\n";
+
     @Autowired
-    public MattermostService(RestTemplate restTemplate, UserDetailsRepository userDetailsRepository) {
-        this.restTemplate = restTemplate;
+    public MattermostService(UserDetailsRepository userDetailsRepository) {
         this.userDetailsRepository = userDetailsRepository;
     }
 
-    private MattermostPayloadDTO simpleTextPayload(String athleteKey, String message) {
-        MattermostPayloadDTO mmPayload = new MattermostPayloadDTO();
-        mmPayload.setChannel(userDetailsRepository.getUser(athleteKey).getMattermostDetails().getChannelName());
-        mmPayload.setUsername(this.mmUsername);
-        mmPayload.setIcon_url(this.mmUserIconUrl);
-        mmPayload.setText(message);
-        return mmPayload;
+    private IncomingWebhookRequest simpleTextPayload(String athleteKey, String message) {
+        IncomingWebhookRequest payload = new IncomingWebhookRequest();
+        payload.setChannel(userDetailsRepository.getUser(athleteKey).getMattermostDetails().getChannelName());
+        payload.setUsername(this.mmUsername);
+        payload.setIconUrl(this.mmUserIconUrl);
+        payload.setText(message);
+        return payload;
     }
 
-    public void postActivity(StravaActivity activity) {
+    private IncomingWebhookRequest activityPayload(StravaAthlete athlete, StravaActivity activity) {
+        String text = String.format("%s completed a new activity!", athlete.getFirstname());
+
+        int hours = activity.getMovingTime() / 60 / 60;
+        int totalMinutes = activity.getMovingTime() / 60;
+        int minutes = totalMinutes % 60;
+
+        String attachmentText = String.format(
+                attachmentTemplate,
+                activity.getName(),
+                activity.getDistance() / 1609.34,
+                activity.getAverageSpeed() * 2.23694,
+                hours, minutes
+        );
+
+        IncomingWebhookRequest payload = new IncomingWebhookRequest();
+        SlackAttachment attachment = new SlackAttachment();
+        attachment.setText(attachmentText);
+        attachment.setColor("#fc5200");
+
+        payload.setChannel(userDetailsRepository.getUser(String.valueOf(athlete.getId())).getMattermostDetails().getChannelName());
+        payload.setText(text);
+        payload.setAttachments(Arrays.asList(attachment));
+        payload.setUsername(this.mmUsername);
+        payload.setIconUrl(this.mmUserIconUrl);
+
+        return payload;
+    }
+
+    public void postActivity(StravaAthlete athlete, StravaActivity activity) {
         String athleteId = String.valueOf(activity.getAthlete().getId());
-        this.restTemplate.postForLocation(getMattermostPostEndpoint(athleteId), simpleTextPayload(athleteId, activity.getName()));
+
+        IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteId));
+        IncomingWebhookRequest payload = activityPayload(athlete, activity);
+
+        incomingWebhookClient.postByIncomingWebhook(payload);
     }
 
     public void postAddRequest(String athleteKey, String code) {
-        String message = "An athlete has requested to have their activities shared with this channel, click this link to approve: %s?code=%s&athleteKey=%s";
+        String message = String.format(
+                "An athlete has requested to have their activities shared with this channel, click this link to approve: %s?code=%s&athleteKey=%s",
+                approvalUrl, code, athleteKey
+        );
 
-        String endpoint = getMattermostPostEndpoint(athleteKey);
-        MattermostPayloadDTO payload = simpleTextPayload(athleteKey, String.format(message, approvalUrl, code, athleteKey));
+        IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteKey));
+        IncomingWebhookRequest payload = simpleTextPayload(athleteKey, message);
 
-        this.restTemplate.postForLocation(endpoint, payload);
+        incomingWebhookClient.postByIncomingWebhook(payload);
     }
 
     private String getMattermostPostEndpoint(String athleteKey) {
