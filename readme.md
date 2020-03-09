@@ -1,3 +1,4 @@
+![Heroku](https://heroku-badge.herokuapp.com/?app=strava-mattermost-connector)
 # Strava Mattermost Connector
 
 Integrate your Mattermost chat server with Strava. Under active development. 
