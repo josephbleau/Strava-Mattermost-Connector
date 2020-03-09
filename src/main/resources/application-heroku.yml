@@ -4,21 +4,21 @@ mattermost:
     icon-url: https://strava-mattermost-connector.herokuapp.com/img/user_icon.png
 
 strava:
-    subscription.id: ${SUBSCRIPTION_ID}
-    subscription:
-      verify-token: STRAVA
-    api:
-      url: https://www.strava.com/api/v3
-      activity-endpoint: /activities/{id}
-      code: ${CODE}
-    oauth:
-      token-endpoint: https://www.strava.com/api/v3/oauth/token
-      grant-type: refresh_token
-      client-id: ${CLIENT_ID}
-      client-secret: ${CLIENT_SECRET}
-      refresh-token: ${REFRESH_TOKEN}
-      authorize-url: https://www.strava.com/oauth/authorize?client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}&scope=activity:read_all
-      authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/registration/step2
+  subscription.id: ${SUBSCRIPTION_ID}
+  subscription:
+    verify-token: STRAVA
+  api:
+    url: https://www.strava.com/api/v3
+    activity-endpoint: /activities/{id}
+    code: ${CODE}
+  oauth:
+    token-endpoint: https://www.strava.com/api/v3/oauth/token
+    grant-type: refresh_token
+    client-id: ${CLIENT_ID}
+    client-secret: ${CLIENT_SECRET}
+    refresh-token: ${REFRESH_TOKEN}
+    authorize-url: https://www.strava.com/oauth/authorize?client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}&scope=activity:read_all
+    authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/registration/step2
 
 connector:
   approval-url: https://strava-mattermost-connector.herokuapp.com/registration/step4
@@ -26,3 +26,8 @@ connector:
 spring:
   redis:
     url: ${REDIS_URL}
+
+google:
+  api-key: ${GOOGLE_API_KEY}
+  static-maps:
+    url: https://maps.googleapis.com/maps/api/staticmap

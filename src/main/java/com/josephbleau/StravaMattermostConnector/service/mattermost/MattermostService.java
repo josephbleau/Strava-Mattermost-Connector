@@ -1,6 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.service.mattermost;
 
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
+import com.josephbleau.StravaMattermostConnector.service.google.StaticMapService;
 import javastrava.model.StravaActivity;
 import javastrava.model.StravaAthlete;
 import net.bis5.mattermost.client4.hook.IncomingWebhookClient;
@@ -24,16 +25,18 @@ public class MattermostService {
     private String approvalUrl;
 
     private UserDetailsRepository userDetailsRepository;
+    private StaticMapService staticMapService;
 
-    private static final String attachmentTemplate = "**Title: %s**\n" +
+    private static final String attachmentTemplate = "**%s**\n" +
             "\n" +
             "* **Distance:** %.2f mi\n" +
             "* **Pace:** %.2f mph\n" +
             "* **Duration:** %dh %02dm\n";
 
     @Autowired
-    public MattermostService(UserDetailsRepository userDetailsRepository) {
+    public MattermostService(UserDetailsRepository userDetailsRepository, StaticMapService staticMapService) {
         this.userDetailsRepository = userDetailsRepository;
+        this.staticMapService = staticMapService;
     }
 
     private IncomingWebhookRequest simpleTextPayload(String athleteKey, String message) {
@@ -63,6 +66,7 @@ public class MattermostService {
         IncomingWebhookRequest payload = new IncomingWebhookRequest();
         SlackAttachment attachment = new SlackAttachment();
         attachment.setText(attachmentText);
+        attachment.setImageUrl(staticMapService.generateStaticMap(activity));
         attachment.setColor("#fc5200");
 
         payload.setChannel(userDetailsRepository.getUser(String.valueOf(athlete.getId())).getMattermostDetails().getChannelName());

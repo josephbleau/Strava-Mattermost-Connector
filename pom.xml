@@ -73,6 +73,13 @@
 			<artifactId>mattermost4j-core</artifactId>
 			<version>0.20.0</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/de.pentabyte/google-static-map-creator -->
+		<dependency>
+			<groupId>de.pentabyte</groupId>
+			<artifactId>google-static-map-creator</artifactId>
+			<version>2.3.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
