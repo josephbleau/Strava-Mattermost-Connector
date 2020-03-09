@@ -6,7 +6,7 @@ You can start using it today by visiting: https://strava-mattermost-connector.he
 
 Be warned this application is under active development and so things may change or break! 😊
 
-## Changelog
+## Worklog (keeping track of what I've done each day)
 
 * 3/8/2020
 	* Refactored registration flow!
