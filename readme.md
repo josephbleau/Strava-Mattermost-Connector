@@ -1,4 +1,4 @@
-#Strava Mattermost Connector
+# Strava Mattermost Connector
 
 Integrate your Mattermost chat server with Strava. Under active development. 
 
@@ -6,7 +6,7 @@ You can start using it today by visiting: https://strava-mattermost-connector.he
 
 Be warned this application is under active development and so things may change or break! 😊
 
-##Changelog
+## Changelog
 
 * 3/8/2020
 	* Refactored registration flow!
