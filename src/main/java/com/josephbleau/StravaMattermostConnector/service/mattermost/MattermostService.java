@@ -39,9 +39,15 @@ public class MattermostService {
         this.staticMapService = staticMapService;
     }
 
-    private IncomingWebhookRequest simpleTextPayload(String athleteKey, String message) {
+    private IncomingWebhookRequest registrationPayload(String athleteKey, String code) {
+        String message = String.format(
+                "You have requested to have your Strava activities shared with ~%s, if you made this request click this link to approve: %s?code=%s&athleteKey=%s" +
+                ". You will only need to do this once. If you did not make this request do not follow that link and please contact your Mattermost administrators.",
+                userDetailsRepository.getUser(athleteKey).getMattermostDetails().getChannelName(), approvalUrl, code, athleteKey
+        );
+
         IncomingWebhookRequest payload = new IncomingWebhookRequest();
-        payload.setChannel(userDetailsRepository.getUser(athleteKey).getMattermostDetails().getChannelName());
+        payload.setChannel("@" + userDetailsRepository.getUser(athleteKey).getMattermostDetails().getUserName());
         payload.setUsername(this.mmUsername);
         payload.setIconUrl(this.mmUserIconUrl);
         payload.setText(message);
@@ -88,13 +94,8 @@ public class MattermostService {
     }
 
     public void postAddRequest(String athleteKey, String code) {
-        String message = String.format(
-                "An athlete has requested to have their activities shared with this channel, click this link to approve: %s?code=%s&athleteKey=%s",
-                approvalUrl, code, athleteKey
-        );
-
         IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteKey));
-        IncomingWebhookRequest payload = simpleTextPayload(athleteKey, message);
+        IncomingWebhookRequest payload = registrationPayload(athleteKey, code);
 
         incomingWebhookClient.postByIncomingWebhook(payload);
     }
