@@ -17,11 +17,13 @@ strava:
     client-id: ${CLIENT_ID}
     client-secret: ${CLIENT_SECRET}
     refresh-token: ${REFRESH_TOKEN}
-    authorize-url: https://www.strava.com/oauth/authorize?client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}&scope=activity:read_all
+    authorize-url: https://www.strava.com/oauth/authorize?scope=activity:read_all&client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}?settings={settings}
     authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/registration/step2
 
 connector:
+  base-url: https://strava-mattermost-connector.herokuapp.com
   approval-url: https://strava-mattermost-connector.herokuapp.com/registration/step4
+  encryption-key: ${ENCRYPTION_KEY}
 
 spring:
   redis:

@@ -2,6 +2,7 @@ package com.josephbleau.StravaMattermostConnector.config;
 
 import javastrava.auth.AuthorisationService;
 import javastrava.auth.impl.AuthorisationServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,10 +30,16 @@ public class StravaConfig {
     @Value("${strava.oauth.authorize-redirect-url}")
     private String authorizeRedirectUrl;
 
-    public String getAuthorizeUrl() {
-        return authorizeUrl
+    public String getAuthorizeUrl(String settings) {
+        String url = authorizeUrl
                 .replace("{clientId}", String.valueOf(getClientId()))
                 .replace("{redirectUri}", this.authorizeRedirectUrl);
+
+        if (!StringUtils.isEmpty(settings)) {
+            url.replace("{settings}", settings);
+        }
+
+        return url;
     }
 
     @Bean
