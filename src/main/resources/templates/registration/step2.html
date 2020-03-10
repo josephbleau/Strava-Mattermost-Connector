@@ -19,38 +19,46 @@
         <h3>You have successfully authorized our application with Strava.</h3>
         <p>The next step in the process is for us to setup your Mattermost integration settings.</p>
         <form action="#" th:action="${nextStep}" method="post" th:object="${mattermostDetails}">
-            <div class="form-group">
-                <label for="mattermostUserName">Mattermost User Name</label>
-                <input type="text" class="form-control" id="mattermostUserName" th:value="${mattermostDetails.userName}" th:field="*{userName}">
+            <div class="form-row">
+                <div class="form-row col-md-12">
+                    <label for="mattermostUserName">Mattermost User Name</label>
+                    <input type="text" class="form-control" id="mattermostUserName" th:value="${mattermostDetails.userName}" th:field="*{userName}">
+                </div>
+            </div>
 
-                <label for="mattermostHost">Mattermost Hostname</label>
-                <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="mattermostHost">Mattermost Hostname</label>
+                    <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="mattermostPort">Mattermost Port</label>
+                    <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
+                </div>
+            </div>
 
-                <label for="mattermostPort">Mattermost Port</label>
-                <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
+            <div class="form-row" style="margin-top: 20px">
+                <div class="form-group col-md-6">
+                    <label for="mattermostTeamName">Mattermost Team Name</label>
+                    <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="mattermostChannelName">Mattermost Channel Name</label>
+                    <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
+                </div>
+            </div>
 
-                <label for="mattermostTeamName">Mattermost Team Name</label>
-                <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="mattermostHookToken">Mattermost Hook Token</label>
+                    <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
+                </div>
+            </div>
 
-                <label for="mattermostChannelName">Mattermost Channel Name</label>
-                <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
-
-                <label for="mattermostHookToken">Mattermost Hook Token</label>
-                <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
-
-<!--                <div class="form-check">-->
-<!--                    <label>Which activity types would you like to share?</label> </br>-->
-
-<!--                    <input class="form-check-input" type="checkbox" value="" id="stravaActivyTypeRunning">-->
-<!--                    <label for="stravaActivyTypeRunning">Running</label>-->
-
-<!--                    <input class="form-check-input" type="checkbox" value="" id="stravaActivyTypeBiking">-->
-<!--                    <label for="stravaActivyTypeBiking">Biking</label>-->
-
-<!--                    <input class="form-check-input" type="checkbox" value="" id="stravaActivityTypeSwimming">-->
-<!--                    <label for="stravaActivityTypeSwimming">Swimming</label>-->
-<!--                </div>-->
-                <button type="submit" class="btn btn-primary btn-lg">Looks good, let's continue...</button>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <button type="submit" class="btn btn-primary btn-lg">Looks good, let's continue...</button>
+                </div>
             </div>
         </form>
     </div>

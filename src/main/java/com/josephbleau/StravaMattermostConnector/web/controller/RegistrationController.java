@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+import retrofit.RetrofitError;
 
 @Controller
 @RequestMapping("/registration")
@@ -94,5 +95,15 @@ public class RegistrationController {
     @GetMapping("/alreadyRegistered")
     public String alreadyRegistered() {
         return "";
+    }
+
+    /**
+     * If during token exchange (code for auth token) an error occurs then we will fail silently and redirect the user
+     * back to the main page. This should only occur when the token has been previously consumed (user is pressing back
+     * or refreshing at an inappropriate time).
+     */
+    @ExceptionHandler({RetrofitError.class})
+    public String tokenExchangeError() {
+        return "index";
     }
 }
