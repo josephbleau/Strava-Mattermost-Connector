@@ -13,6 +13,9 @@ import javastrava.auth.model.Token;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -76,6 +79,10 @@ public class RegistrationController {
             @RequestParam(value = "settings", required = false) String settings) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         Token token = stravaApiService.exchangeCodeForToken(code);
         Integer athleteId = token.getAthlete().getId();
+
+        SecurityContextHolder.clearContext();
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        Authentication auth;
 
         MattermostDetails mattermostDetails = new MattermostDetails();
 

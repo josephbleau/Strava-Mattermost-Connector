@@ -4,6 +4,8 @@ import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
 import com.josephbleau.StravaMattermostConnector.model.StravaApiDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
