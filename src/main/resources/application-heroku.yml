@@ -23,7 +23,6 @@ spring:
             strava:
               client-id: ${CLIENT_ID}
               client-secret: ${CLIENT_SECRET}
-              client-grant-type: authorization_code
               scope: activity:read_all
               authorization-uri: https://www.strava.com/oauth/authorize
               token-uri: https://www.strava.com/oauth/token

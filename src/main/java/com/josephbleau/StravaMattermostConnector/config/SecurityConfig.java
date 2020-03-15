@@ -1,6 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.config;
 
-import com.josephbleau.StravaMattermostConnector.config.StravaOAuth.StravaOAuth2UserService;
+import com.josephbleau.StravaMattermostConnector.config.auth.StravaOAuth2Details;
+import com.josephbleau.StravaMattermostConnector.config.auth.StravaOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,8 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .scope(stravaOAuth2Details.getScope())
                 .authorizationUri(stravaOAuth2Details.getAuthorizationUri())
                 .tokenUri(stravaOAuth2Details.getTokenUri())
-                .userInfoUri("http://localhost:8080/login/oauth2/userinfo/strava")
-                .userNameAttributeName("test")
                 .clientName("Strava")
                 .build();
     }

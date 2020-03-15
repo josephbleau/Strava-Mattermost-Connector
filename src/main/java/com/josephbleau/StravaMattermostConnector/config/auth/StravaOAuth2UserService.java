@@ -1,4 +1,4 @@
-package com.josephbleau.StravaMattermostConnector.config.StravaOAuth;
+package com.josephbleau.StravaMattermostConnector.config.auth;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
