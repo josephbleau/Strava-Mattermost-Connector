@@ -1,5 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.config;
 
+import com.josephbleau.StravaMattermostConnector.config.StravaOAuth.StravaOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,8 +11,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -26,11 +25,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(authorize -> authorize
-                        .antMatchers("/registration/step2").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2Login(withDefaults());
+                .authorizeRequests()
+                    .antMatchers("/", "/login").permitAll()
+                    .antMatchers("/**").authenticated()
+                .and()
+                .oauth2Login()
+                    .userInfoEndpoint()
+                        .userService(new StravaOAuth2UserService());
     }
 
     @Bean
@@ -42,12 +43,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return ClientRegistration.withRegistrationId("strava")
                 .clientId(stravaOAuth2Details.getClientId())
                 .clientSecret(stravaOAuth2Details.getClientSecret())
-                .clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .redirectUriTemplate(stravaOAuth2Details.getRedirectUri())
                 .scope(stravaOAuth2Details.getScope())
                 .authorizationUri(stravaOAuth2Details.getAuthorizationUri())
                 .tokenUri(stravaOAuth2Details.getTokenUri())
+                .userInfoUri("http://localhost:8080/login/oauth2/userinfo/strava")
+                .userNameAttributeName("test")
                 .clientName("Strava")
                 .build();
     }

@@ -1,10 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.service.strava;
 
-import com.josephbleau.StravaMattermostConnector.config.StravaConfig;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
-import javastrava.auth.AuthorisationService;
-import javastrava.auth.impl.AuthorisationServiceImpl;
 import javastrava.auth.model.Token;
 import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
@@ -18,12 +15,10 @@ import java.util.Arrays;
 @Service
 public class StravaApiService {
 
-    private StravaConfig stravaConfig;
     private UserDetailsRepository userDetailsRepository;
 
     @Autowired
-    public StravaApiService(StravaConfig stravaConfig, UserDetailsRepository userDetailsRepository) {
-        this.stravaConfig = stravaConfig;
+    public StravaApiService(UserDetailsRepository userDetailsRepository) {
         this.userDetailsRepository = userDetailsRepository;
     }
 
@@ -43,17 +38,6 @@ public class StravaApiService {
         return new Strava(token);
     }
 
-    public Token exchangeCodeForToken(String code) {
-        AuthorisationService authorisationService = new AuthorisationServiceImpl();
-
-        Token token = authorisationService.tokenExchange(
-                stravaConfig.getClientId(),
-                stravaConfig.getClientSecret(),
-                code
-        );
-
-        return token;
-    }
 
     public StravaActivity getActivityForAthlete(long activityId, int athleteId) {
         return strava(athleteId).getActivity(activityId);
@@ -61,9 +45,5 @@ public class StravaApiService {
 
     public StravaAthlete getAthlete(int athleteId) {
         return strava(athleteId).getAthlete(athleteId);
-    }
-
-    public String getAuthorizeUrl(String settings) {
-        return stravaConfig.getAuthorizeUrl(settings);
     }
 }

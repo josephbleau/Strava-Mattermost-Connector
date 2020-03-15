@@ -9,32 +9,28 @@ import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
 import com.josephbleau.StravaMattermostConnector.service.strava.StravaApiService;
-import javastrava.auth.model.Token;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.view.RedirectView;
 import retrofit.RetrofitError;
 
-import javax.crypto.*;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 @Controller
 @RequestMapping("/registration")
@@ -61,35 +57,21 @@ public class RegistrationController {
     }
 
     /**
-     * Redirect the user to the Strava app authorization view.
-     */
-    @GetMapping("/step1")
-    public RedirectView stepOne(@RequestParam(value = "settings", required = false) String settings, RedirectAttributes attributes) {
-        attributes.addAttribute("settings", settings);
-        return new RedirectView(stravaApiService.getAuthorizeUrl(settings));
-    }
-
-    /**
      * Callback that is invoked when a user authorizes our application.
      */
-    @GetMapping("/step2")
+    @GetMapping("/config")
     public String stepTwo(
             Model model,
-            @RequestParam("code") String code,
-            @RequestParam(value = "settings", required = false) String settings) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
-        Token token = stravaApiService.exchangeCodeForToken(code);
-        Integer athleteId = token.getAthlete().getId();
+            @AuthenticationPrincipal OAuth2User oauth2User,
+            @RequestParam(value = "settings", required = false) String settings)
+            throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
 
-        SecurityContextHolder.clearContext();
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        Authentication auth;
-
+        UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName()) ;
         MattermostDetails mattermostDetails = new MattermostDetails();
 
-        if (athleteId != null) {
-            String athleteKey = String.valueOf(athleteId);
-            mattermostDetails = userDetailsRepository.getUser(athleteKey).getMattermostDetails();
-            model.addAttribute("nextStep", String.format("/registration/step3?code=%s&athleteKey=%s&stravaToken=%s", code, athleteKey, token.getToken()));
+        if (userDetails != null) {
+            mattermostDetails = userDetails.getMattermostDetails();
+            model.addAttribute("nextStep", String.format("/registration/verify"));
         }
 
         if (settings != null && !"".equals(settings)) {
@@ -112,10 +94,10 @@ public class RegistrationController {
 
         model.addAttribute("mattermostDetails", mattermostDetails);
 
-        return "registration/step2";
+        return "registration/config";
     }
 
-    @PostMapping("/step3")
+    @PostMapping("/verify")
     public String stepThree(
             @RequestParam("code") String code,
             @RequestParam("athleteKey") String athleteKey,
@@ -133,13 +115,13 @@ public class RegistrationController {
         userDetailsRepository.saveUser(userDetails);
         mattermostService.postAddRequest(athleteKey, code);
 
-        return "registration/step3";
+        return "registration/verify";
     }
 
     /**
      * Called when a user from matter-most verifies a registration.
      */
-    @GetMapping("/step4")
+    @GetMapping("/finalize")
     public String stepFour(Model model,
                            @RequestParam("code") String code,
                            @RequestParam("athleteKey") String athleteKey) throws JsonProcessingException, NoSuchPaddingException, NoSuchAlgorithmException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidAlgorithmParameterException {
@@ -161,15 +143,7 @@ public class RegistrationController {
 
         model.addAttribute("shareSettingsLink", baseUrl + "?settings=" + encodedSettings);
 
-        return "registration/step4";
-    }
-
-    /**
-     * Called when a user logs in but is already registered
-     */
-    @GetMapping("/alreadyRegistered")
-    public String alreadyRegistered() {
-        return "";
+        return "registration/finalize";
     }
 
     /**
