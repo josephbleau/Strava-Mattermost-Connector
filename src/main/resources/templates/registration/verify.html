@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Strava Mattermost Connector</title>
@@ -16,9 +16,22 @@
 <div class="row'">
     <div class="col-md-12">
         <h1>Strava Mattermost Connector</h1>
-        <h2>Configuration: Step 3 (of 3)</h2>
         <h3>We're almost done, time to check Mattermost!</h3>
         <p>Thanks for providing that information! As one final step please check the mattermost message that was sent and provide the code here that was sent.
+        <div class="alert alert-danger" role="alert" th:if="${error != null}">
+            <span th:text="${error}"/>
+        </div>
+        <form action="#" th:action="@{/registration/check}" method="post" th:object="${verificationCode}">
+            <div class="form-row">
+                <label for="verificationCode">Verification Code</label>
+                <input type="text" class="form-control" id="verificationCode" th:field="*{code}"/>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <button type="submit" class="btn btn-primary btn-lg">Validate Code</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 </body>

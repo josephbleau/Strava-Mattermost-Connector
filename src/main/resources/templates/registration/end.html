@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Strava Mattermost Connector</title>
@@ -16,19 +16,18 @@
 <div class="row'">
     <div class="col-md-12">
         <h1>Strava Mattermost Connector</h1>
-        <h2>Configuration Complete</h2>
         <h3>You have successfully registered with the Strava Mattermost Connector</h3>
         <p>New activities on your feed will now automatically be posted to the mattermost channel. If you wish to stop this from happening you can
         revoke the applications privileges in your <a href="https://www.strava.com/settings/apps">Strava Settings</a></p>
     </div>
-    <div class="col-md-6">
-        <h3>Want others on your server to register?</h3>
-        <p>You can share this link with others on your mattermost server and it will pre-configure their mattermost settings
-            for them when they authorize!</p>
-        <p><span class="text-danger">Warning: This will expose the webhook token to that user (for now). In a future update this will be addressed.</span></p>
-        <code class="text-break" style="overflow-wrap: break-word; word-break: break-word" th:text="${shareSettingsLink}"}/>
-        <br><br><span class="text-info">Hint: Triple click red text to select all of it.</span>
-    </div>
+<!--    <div class="col-md-6">-->
+<!--        <h3>Want others on your server to register?</h3>-->
+<!--        <p>You can share this link with others on your mattermost server and it will pre-configure their mattermost settings-->
+<!--            for them when they authorize!</p>-->
+<!--        <p><span class="text-danger">Warning: This will expose the webhook token to that user (for now). In a future update this will be addressed.</span></p>-->
+<!--        <code class="text-break" style="overflow-wrap: break-word; word-break: break-word" th:text="${shareSettingsLink}"}/>-->
+<!--        <br><br><span class="text-info">Hint: Triple click red text to select all of it.</span>-->
+<!--    </div>-->
     <div class="col-md-6">
         <h3>Thank you!</h3>
         <span text="text-info">If you've enjoyed using this service please consider a small donation. Proceeds earned will go directly to

@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.Collections;
 
 @Service
 public class MattermostService {
@@ -62,7 +61,7 @@ public class MattermostService {
 
         payload.setChannel(userDetailsRepository.getUser(String.valueOf(athlete.getId())).getMattermostDetails().getChannelName());
         payload.setText(text);
-        payload.setAttachments(Arrays.asList(attachment));
+        payload.setAttachments(Collections.singletonList(attachment));
         payload.setUsername(this.mmUsername);
         payload.setIconUrl(this.mmUserIconUrl);
 
@@ -78,8 +77,7 @@ public class MattermostService {
         incomingWebhookClient.postByIncomingWebhook(payload);
     }
 
-    public void sendVerificationCode(MattermostDetails mattermostDetails) {
-        String verificationCode = generateVerificationCode();
+    public String sendVerificationCode(MattermostDetails mattermostDetails, String verificationCode) {
         String message = String.format("Hey there, this is the Strava Mattermost Connector. Here is your verification code: %s", verificationCode);
 
         IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(mattermostDetails.getWebookUrl());
@@ -91,26 +89,11 @@ public class MattermostService {
         payload.setText(message);
 
         incomingWebhookClient.postByIncomingWebhook(payload);
+
+        return verificationCode;
     }
 
     private String getMattermostPostEndpoint(String athleteKey) {
         return userDetailsRepository.getUser(athleteKey).getMattermostDetails().getWebookUrl();
-    }
-
-    /**
-     * Generate a random four digit code.
-     */
-    private String generateVerificationCode() {
-        final int length = 4;
-        final char[] characters = new char[]{'S','T','R','V','A', '1', '2','3','4','5'};
-
-        StringBuilder code = new StringBuilder();
-        Random random = new Random();
-
-        for (int i = 0; i < length; ++i) {
-            code.append(characters[random.nextInt(characters.length)]);
-        }
-
-        return code.toString();
     }
 }
