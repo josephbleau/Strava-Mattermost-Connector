@@ -109,7 +109,10 @@ public class UserDetailsRepository {
 
             boolean verified = Boolean.parseBoolean(userDetailValues.get(0));
 
-            return new UserDetails(athleteKey, verified, mattermostDetails);
+            UserDetails userDetails = new UserDetails(athleteKey, verified, mattermostDetails);
+            userDetails.setStravaTokenDetails(stravaTokenDetails);
+
+            return userDetails;
         }
     }
 

@@ -5,6 +5,7 @@ import com.josephbleau.StravaMattermostConnector.config.auth.StravaOAuth2UserSer
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -24,10 +25,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/strava/**");
+    }
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/", "/login", "/strava/event").permitAll()
+                    .antMatchers("/", "/login", "/strava/**").permitAll()
                     .antMatchers("/**").authenticated()
                 .and()
                 .oauth2Login()
