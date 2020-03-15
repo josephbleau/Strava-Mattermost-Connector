@@ -85,7 +85,11 @@ public class RegistrationController {
 
             userDetailsRepository.saveUser(userDetails);
 
-            mattermostService.sendVerificationCode(hiddenMatterMostDetails, verificationCodeManager.getCode());
+            if (mattermostDetails.getHidden()) {
+                mattermostService.sendVerificationCode(hiddenMatterMostDetails, verificationCodeManager.getCode());
+            } else {
+                mattermostService.sendVerificationCode(mattermostDetails, verificationCodeManager.getCode());
+            }
         }
 
         model.addAttribute("error", error);
