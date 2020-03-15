@@ -1,7 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.repository;
 
 import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
-import com.josephbleau.StravaMattermostConnector.model.StravaApiDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,12 +35,7 @@ public class UserDetailsRepository {
             throw new NullPointerException("MattermostDetails inside of UserDetails cannot be null.");
         }
 
-        if (userDetails.getStravaApiDetails() == null) {
-            throw new NullPointerException("StravaApiDetails insode of UserDetails cannot be null.");
-        }
-
         userDetailsMap.put(userDetailFields[0], String.valueOf(userDetails.isVerified()));
-        userDetailsMap.put(userDetailFields[1], userDetails.getStravaApiDetails().getToken());
         userDetailsMap.put(userDetailFields[2], userDetails.getMattermostDetails().getHost());
         userDetailsMap.put(userDetailFields[3], userDetails.getMattermostDetails().getPort());
         userDetailsMap.put(userDetailFields[4], userDetails.getMattermostDetails().getHookToken());
@@ -71,11 +65,9 @@ public class UserDetailsRepository {
                     userDetailValues.get(7)
             );
 
-            StravaApiDetails stravaApiDetails = new StravaApiDetails(userDetailValues.get(1));
-
             Boolean verified = Boolean.valueOf(userDetailValues.get(0));
 
-            return new UserDetails(athleteKey, verified, stravaApiDetails, mattermostDetails);
+            return new UserDetails(athleteKey, verified, mattermostDetails);
         }
     }
 

@@ -4,7 +4,6 @@ import com.bazaarvoice.jackson.rison.RisonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
-import com.josephbleau.StravaMattermostConnector.model.StravaApiDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
@@ -17,6 +16,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 import retrofit.RetrofitError;
 
 import javax.crypto.BadPaddingException;
@@ -25,12 +25,12 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 
 @Controller
 @RequestMapping("/registration")
@@ -60,36 +60,15 @@ public class RegistrationController {
      * Callback that is invoked when a user authorizes our application.
      */
     @GetMapping("/config")
-    public String stepTwo(
-            Model model,
-            @AuthenticationPrincipal OAuth2User oauth2User,
-            @RequestParam(value = "settings", required = false) String settings)
-            throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
-
-        UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName()) ;
+    public String config(@AuthenticationPrincipal OAuth2User oauth2User, Model model) {
         MattermostDetails mattermostDetails = new MattermostDetails();
 
-        if (userDetails != null) {
+        UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName());
+        if (userDetails != null && userDetails.isVerified()) {
             mattermostDetails = userDetails.getMattermostDetails();
-            model.addAttribute("nextStep", String.format("/registration/verify"));
-        }
-
-        if (settings != null && !"".equals(settings)) {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            Key secretKey = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(new byte[16]));
-
-            byte[] decodedSettings = Base64.decodeBase64(settings);
-            String decryptedSettings = new String(cipher.doFinal(decodedSettings));
-
-            ObjectMapper objectMapper = new ObjectMapper(new RisonFactory());
-            MattermostDetails copiedSettings = objectMapper.readValue(decryptedSettings, MattermostDetails.class);
-
-            mattermostDetails.setTeamName(copiedSettings.getTeamName());
-            mattermostDetails.setChannelName(copiedSettings.getChannelName());
-            mattermostDetails.setHookToken(copiedSettings.getHookToken());
-            mattermostDetails.setHost(copiedSettings.getHost());
-            mattermostDetails.setPort(copiedSettings.getPort());
+            model.addAttribute("nextStep", "/registration/finalize");
+        } else {
+            model.addAttribute("nextStep", "/registration/verify");
         }
 
         model.addAttribute("mattermostDetails", mattermostDetails);
@@ -97,24 +76,13 @@ public class RegistrationController {
         return "registration/config";
     }
 
+
+
     @PostMapping("/verify")
-    public String stepThree(
-            @RequestParam("code") String code,
-            @RequestParam("athleteKey") String athleteKey,
-            @RequestParam("stravaToken") String stravaToken,
-            @ModelAttribute MattermostDetails mattermostDetails) {
-
-        UserDetails userDetails = userDetailsRepository.getUser(athleteKey);
-
-        if (userDetails.isVerified()) {
-            userDetails.setMattermostDetails(mattermostDetails);
-        } else {
-            userDetails = new UserDetails(athleteKey, false, new StravaApiDetails(stravaToken), mattermostDetails);
-        }
-
-        userDetailsRepository.saveUser(userDetails);
-        mattermostService.postAddRequest(athleteKey, code);
-
+    public String verify(
+            @AuthenticationPrincipal OAuth2User oAuth2User,
+            @ModelAttribute MattermostDetails mattermostDetails)  {
+        mattermostService.sendVerificationCode(mattermostDetails);
         return "registration/verify";
     }
 
@@ -122,7 +90,7 @@ public class RegistrationController {
      * Called when a user from matter-most verifies a registration.
      */
     @GetMapping("/finalize")
-    public String stepFour(Model model,
+    public String finalize(Model model,
                            @RequestParam("code") String code,
                            @RequestParam("athleteKey") String athleteKey) throws JsonProcessingException, NoSuchPaddingException, NoSuchAlgorithmException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidAlgorithmParameterException {
         UserDetails userDetails = userDetailsRepository.getUser(athleteKey);
