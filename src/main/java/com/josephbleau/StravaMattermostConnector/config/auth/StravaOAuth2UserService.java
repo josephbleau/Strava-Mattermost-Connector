@@ -8,10 +8,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +39,8 @@ public class StravaOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         attributes.put("athleteId", athleteId);
         attributes.put("token", userRequest.getAccessToken().getTokenValue());
+        attributes.put("refreshToken", "gotta figure out to get this");
+        attributes.put("expiresAt", Objects.requireNonNull(userRequest.getAccessToken().getExpiresAt()).toEpochMilli());
 
         return new DefaultOAuth2User(authorities, attributes, "athleteId");
     }

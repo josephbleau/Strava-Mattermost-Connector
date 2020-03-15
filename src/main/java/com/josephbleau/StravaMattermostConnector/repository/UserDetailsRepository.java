@@ -1,6 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.repository;
 
 import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
+import com.josephbleau.StravaMattermostConnector.model.StravaTokenDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,9 @@ public class UserDetailsRepository {
     private JedisPool jedisPool;
 
     private String[] userDetailFields = new String[]{
-            "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:team-name", "mattermost:channel-name", "mattermost:user-name", "mattermost:hidden"
+            "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token",
+            "mattermost:team-name", "mattermost:channel-name", "mattermost:user-name", "mattermost:hidden",
+            "strava:token", "strava:refresh-token", "strava:expires-at"
     };
 
     @Autowired
@@ -60,6 +63,18 @@ public class UserDetailsRepository {
         userDetailsMap.put(userDetailFields[7], userDetails.getMattermostDetails().getUserName());
         userDetailsMap.put(userDetailFields[8], String.valueOf(userDetails.getMattermostDetails().getHidden()));
 
+        if (userDetails.getStravaTokenDetails() != null) {
+            if (userDetails.getStravaTokenDetails().getToken() != null) {
+                userDetailsMap.put(userDetailFields[9],userDetails.getStravaTokenDetails().getToken() );
+            }
+
+            if (userDetails.getStravaTokenDetails().getRefreshToken() != null) {
+                userDetailsMap.put(userDetailFields[10], userDetails.getStravaTokenDetails().getRefreshToken());
+            }
+
+            userDetailsMap.put(userDetailFields[11], String.valueOf(userDetails.getStravaTokenDetails().getExpiresAt()));
+        }
+
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.hmset("user:" + userDetails.getAthleteKey(), userDetailsMap);
         }
@@ -82,9 +97,17 @@ public class UserDetailsRepository {
                     userDetailValues.get(7)
             );
 
+            StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
+            stravaTokenDetails.setToken(userDetailValues.get(9));
+            stravaTokenDetails.setRefreshToken(userDetailValues.get(10));
+
+            if (userDetailValues.get(11) != null) {
+                stravaTokenDetails.setExpiresAt(Long.parseLong(userDetailValues.get(11)));
+            }
+
             mattermostDetails.setHidden(Boolean.valueOf(userDetailValues.get(8)));
 
-            Boolean verified = Boolean.valueOf(userDetailValues.get(0));
+            boolean verified = Boolean.parseBoolean(userDetailValues.get(0));
 
             return new UserDetails(athleteKey, verified, mattermostDetails);
         }

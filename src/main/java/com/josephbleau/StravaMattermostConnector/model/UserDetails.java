@@ -3,7 +3,9 @@ package com.josephbleau.StravaMattermostConnector.model;
 public class UserDetails {
     private String athleteKey;
     private boolean verified;
+
     private MattermostDetails mattermostDetails;
+    private StravaTokenDetails stravaTokenDetails;
 
     public UserDetails(String athleteKey, boolean verified, MattermostDetails mattermostDetails) {
         this.athleteKey = athleteKey;
@@ -33,5 +35,13 @@ public class UserDetails {
 
     public void setMattermostDetails(MattermostDetails mattermostDetails) {
         this.mattermostDetails = mattermostDetails;
+    }
+
+    public StravaTokenDetails getStravaTokenDetails() {
+        return stravaTokenDetails;
+    }
+
+    public void setStravaTokenDetails(StravaTokenDetails stravaTokenDetails) {
+        this.stravaTokenDetails = stravaTokenDetails;
     }
 }

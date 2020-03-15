@@ -1,6 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.web.controller;
 
 import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
+import com.josephbleau.StravaMattermostConnector.model.StravaTokenDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
@@ -38,10 +39,21 @@ public class RegistrationController {
         this.shareCodeManager = shareCodeManager;
     }
 
+    private StravaTokenDetails getStravaTokenDetails(OAuth2User oAuth2User) {
+        StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
+        stravaTokenDetails.setToken((String) oAuth2User.getAttribute("token"));
+        stravaTokenDetails.setRefreshToken((String) oAuth2User.getAttribute("refreshToken"));
+        stravaTokenDetails.setExpiresAt((long) oAuth2User.getAttribute("expiresAt"));
+        return stravaTokenDetails;
+    }
+
     @GetMapping("/share")
     public String share(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestParam("code") String code) {
         MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
+
         UserDetails userDetails = new UserDetails(oAuth2User.getName(), false, mattermostDetails);
+        userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
+
         userDetailsRepository.saveUser(userDetails);
 
         return "redirect:/registration/config";
@@ -82,6 +94,7 @@ public class RegistrationController {
             userDetails.setVerified(false);
             mattermostDetails.setHidden(hiddenMatterMostDetails.getHidden());
             userDetails.setMattermostDetails(mattermostDetails);
+            userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
 
             userDetailsRepository.saveUser(userDetails);
 
@@ -104,6 +117,7 @@ public class RegistrationController {
         if (verificationCodeManager.verify(verificationCode.getCode())) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
             userDetails.setVerified(true);
+            userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
             userDetailsRepository.saveUser(userDetails);
 
             return "redirect:/registration/end";
@@ -128,6 +142,7 @@ public class RegistrationController {
                                   HttpServletRequest request) {
         UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
         userDetails.setMattermostDetails(mattermostDetails);
+        userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
         userDetailsRepository.saveUser(userDetails);
 
         String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
