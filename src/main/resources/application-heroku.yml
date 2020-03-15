@@ -16,17 +16,17 @@ connector:
 spring:
   redis:
     url: ${REDIS_URL}
-    security:
-      oauth2:
-        client:
-          registration:
-            strava:
-              client-id: ${CLIENT_ID}
-              client-secret: ${CLIENT_SECRET}
-              scope: activity:read_all
-              authorization-uri: https://www.strava.com/oauth/authorize
-              token-uri: https://www.strava.com/oauth/token
-              redirect-uri: http://localhost:8080/login/oauth2/code/strava
+  security:
+    oauth2:
+      client:
+        registration:
+          strava:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope: activity:read_all
+            authorization-uri: https://www.strava.com/oauth/authorize
+            token-uri: https://www.strava.com/oauth/token
+            redirect-uri: http://localhost:8080/login/oauth2/code/strava
 
 google:
   api-key: ${GOOGLE_API_KEY}
