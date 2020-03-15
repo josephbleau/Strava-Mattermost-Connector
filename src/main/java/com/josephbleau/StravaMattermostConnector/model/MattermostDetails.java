@@ -11,6 +11,7 @@ public class MattermostDetails {
     String channelName;
     String teamName;
     String userName;
+    Boolean hidden;
 
     public MattermostDetails() {}
 
@@ -21,6 +22,7 @@ public class MattermostDetails {
         this.teamName = teamName;
         this.channelName = channelName;
         this.userName = userName;
+        this.hidden = false;
     }
 
     public String getHost() {
@@ -69,6 +71,14 @@ public class MattermostDetails {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
     }
 
     @JsonIgnore

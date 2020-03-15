@@ -16,7 +16,6 @@
 <div class="row'">
     <div class="col-md-12">
         <h1>Strava Mattermost Connector</h1>
-        <h2>Configuration: Step 2 (of 3)</h2>
         <h3>You have successfully authorized our application with Strava.</h3>
         <p>The next step in the process is for us to setup your Mattermost integration settings.</p>
         <form action="#" th:action="${nextStep}" method="post" th:object="${mattermostDetails}">
@@ -27,35 +26,36 @@
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="mattermostHost">Mattermost Hostname</label>
-                    <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
+            <div th:if="${mattermostDetails.hidden == null or not mattermostDetails.hidden}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="mattermostHost">Mattermost Hostname</label>
+                        <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="mattermostPort">Mattermost Port</label>
+                        <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
+                    </div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="mattermostPort">Mattermost Port</label>
-                    <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
+
+                <div class="form-row" style="margin-top: 20px">
+                    <div class="form-group col-md-6">
+                        <label for="mattermostTeamName">Mattermost Team Name</label>
+                        <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="mattermostChannelName">Mattermost Channel Name</label>
+                        <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="mattermostHookToken">Mattermost Hook Token</label>
+                        <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
+                    </div>
                 </div>
             </div>
-
-            <div class="form-row" style="margin-top: 20px">
-                <div class="form-group col-md-6">
-                    <label for="mattermostTeamName">Mattermost Team Name</label>
-                    <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="mattermostChannelName">Mattermost Channel Name</label>
-                    <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-md-12">
-                    <label for="mattermostHookToken">Mattermost Hook Token</label>
-                    <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
-                </div>
-            </div>
-
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <button type="submit" class="btn btn-primary btn-lg">Looks good, let's continue...</button>

@@ -1,5 +1,6 @@
 package com.josephbleau.StravaMattermostConnector.service.mattermost;
 
+import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import com.josephbleau.StravaMattermostConnector.service.google.StaticMapService;
 import javastrava.model.StravaActivity;
@@ -11,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 public class MattermostService {
@@ -20,9 +21,6 @@ public class MattermostService {
 
     @Value("${mattermost.user.icon-url}")
     private String mmUserIconUrl;
-
-    @Value("${connector.approval-url}")
-    private String approvalUrl;
 
     private UserDetailsRepository userDetailsRepository;
     private StaticMapService staticMapService;
@@ -39,20 +37,6 @@ public class MattermostService {
         this.staticMapService = staticMapService;
     }
 
-    private IncomingWebhookRequest registrationPayload(String athleteKey, String code) {
-        String message = String.format(
-                "You have requested to have your Strava activities shared with ~%s, if you made this request click this link to approve: %s?code=%s&athleteKey=%s" +
-                ". You will only need to do this once. If you did not make this request do not follow that link and please contact your Mattermost administrators.",
-                userDetailsRepository.getUser(athleteKey).getMattermostDetails().getChannelName(), approvalUrl, code, athleteKey
-        );
-
-        IncomingWebhookRequest payload = new IncomingWebhookRequest();
-        payload.setChannel("@" + userDetailsRepository.getUser(athleteKey).getMattermostDetails().getUserName());
-        payload.setUsername(this.mmUsername);
-        payload.setIconUrl(this.mmUserIconUrl);
-        payload.setText(message);
-        return payload;
-    }
 
     private IncomingWebhookRequest activityPayload(StravaAthlete athlete, StravaActivity activity) {
         String text = String.format("%s completed a new activity!", athlete.getFirstname());
@@ -77,7 +61,7 @@ public class MattermostService {
 
         payload.setChannel(userDetailsRepository.getUser(String.valueOf(athlete.getId())).getMattermostDetails().getChannelName());
         payload.setText(text);
-        payload.setAttachments(Arrays.asList(attachment));
+        payload.setAttachments(Collections.singletonList(attachment));
         payload.setUsername(this.mmUsername);
         payload.setIconUrl(this.mmUserIconUrl);
 
@@ -93,11 +77,20 @@ public class MattermostService {
         incomingWebhookClient.postByIncomingWebhook(payload);
     }
 
-    public void postAddRequest(String athleteKey, String code) {
-        IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteKey));
-        IncomingWebhookRequest payload = registrationPayload(athleteKey, code);
+    public String sendVerificationCode(MattermostDetails mattermostDetails, String verificationCode) {
+        String message = String.format("Hey there, this is the Strava Mattermost Connector. Here is your verification code: %s", verificationCode);
+
+        IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(mattermostDetails.getWebookUrl());
+
+        IncomingWebhookRequest payload = new IncomingWebhookRequest();
+        payload.setChannel("@" + mattermostDetails.getUserName());
+        payload.setUsername(this.mmUsername);
+        payload.setIconUrl(this.mmUserIconUrl);
+        payload.setText(message);
 
         incomingWebhookClient.postByIncomingWebhook(payload);
+
+        return verificationCode;
     }
 
     private String getMattermostPostEndpoint(String athleteKey) {

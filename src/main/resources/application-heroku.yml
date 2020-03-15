@@ -7,27 +7,26 @@ strava:
   subscription.id: ${SUBSCRIPTION_ID}
   subscription:
     verify-token: STRAVA
-  api:
-    url: https://www.strava.com/api/v3
-    activity-endpoint: /activities/{id}
-    code: ${CODE}
-  oauth:
-    token-endpoint: https://www.strava.com/api/v3/oauth/token
-    grant-type: refresh_token
-    client-id: ${CLIENT_ID}
-    client-secret: ${CLIENT_SECRET}
-    refresh-token: ${REFRESH_TOKEN}
-    authorize-url: https://www.strava.com/oauth/authorize?scope=activity:read_all&client_id={clientId}&response_type=code&approval_prompt=force&redirect_uri={redirectUri}?settings={settings}
-    authorize-redirect-url: https://strava-mattermost-connector.herokuapp.com/registration/step2
 
 connector:
   base-url: https://strava-mattermost-connector.herokuapp.com
-  approval-url: https://strava-mattermost-connector.herokuapp.com/registration/step4
+  approval-url: https://strava-mattermost-connector.herokuapp.com/registration/finalize
   encryption-key: ${ENCRYPTION_KEY}
 
 spring:
   redis:
     url: ${REDIS_URL}
+    security:
+      oauth2:
+        client:
+          registration:
+            strava:
+              client-id: ${CLIENT_ID}
+              client-secret: ${CLIENT_SECRET}
+              scope: activity:read_all
+              authorization-uri: https://www.strava.com/oauth/authorize
+              token-uri: https://www.strava.com/oauth/token
+              redirect-uri: http://localhost:8080/login/oauth2/code/strava
 
 google:
   api-key: ${GOOGLE_API_KEY}
