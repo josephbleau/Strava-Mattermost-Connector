@@ -1,6 +1,7 @@
 package com.josephbleau.StravaMattermostConnector.web.dto;
 
 public class VerificationCodeDTO {
+
     private String code;
 
     public String getCode() {
@@ -10,4 +11,5 @@ public class VerificationCodeDTO {
     public void setCode(String code) {
         this.code = code;
     }
+
 }

@@ -17,10 +17,10 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private StravaOAuth2Details stravaOAuth2Details;
+    private final StravaOAuth2Details stravaOAuth2Details;
 
     @Autowired
-    public SecurityConfig(StravaOAuth2Details stravaOAuth2Details) {
+    public SecurityConfig(final StravaOAuth2Details stravaOAuth2Details) {
         this.stravaOAuth2Details = stravaOAuth2Details;
     }
 
@@ -59,4 +59,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .clientName("Strava")
                 .build();
     }
+
 }

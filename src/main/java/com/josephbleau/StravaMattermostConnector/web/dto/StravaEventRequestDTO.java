@@ -3,6 +3,7 @@ package com.josephbleau.StravaMattermostConnector.web.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StravaEventRequestDTO {
+
     @JsonProperty("object_type")
     private StravaObjectTypeDTO objectType;
 
@@ -44,4 +45,5 @@ public class StravaEventRequestDTO {
     public Integer getSubscriptionId() {
         return subscriptionId;
     }
+
 }

@@ -14,7 +14,8 @@ import java.util.Map;
 
 @Service
 public class UserDetailsRepository {
-    private JedisPool jedisPool;
+
+    private final JedisPool jedisPool;
 
     private String[] userDetailFields = new String[]{
             "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token",
@@ -23,7 +24,7 @@ public class UserDetailsRepository {
     };
 
     @Autowired
-    public UserDetailsRepository(JedisPool jedisPool) {
+    public UserDetailsRepository(final JedisPool jedisPool) {
         this.jedisPool = jedisPool;
     }
 
@@ -116,9 +117,4 @@ public class UserDetailsRepository {
         }
     }
 
-    public void deleteUser(String athleteKey) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            jedis.del("user:" + athleteKey);
-        }
-    }
 }

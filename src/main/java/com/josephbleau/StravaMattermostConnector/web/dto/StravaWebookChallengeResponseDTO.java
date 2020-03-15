@@ -3,6 +3,7 @@ package com.josephbleau.StravaMattermostConnector.web.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StravaWebookChallengeResponseDTO {
+
     @JsonProperty("hub.challenge")
     private String challenge;
 
@@ -17,4 +18,5 @@ public class StravaWebookChallengeResponseDTO {
     public void setChallenge(String challenge) {
         this.challenge = challenge;
     }
+
 }

@@ -22,7 +22,7 @@ public class StravaOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private static final Pattern athleteIdPattern = Pattern.compile(athleteIdPatternString, Pattern.MULTILINE);
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    public OAuth2User loadUser(final OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         // Extract the athlete id from the additional parameters (currently being stored as a "almost json"
         // string so we're using regex to pull it out.
         String athleteDetails = (String) userRequest.getAdditionalParameters().get("athlete");
@@ -44,4 +44,5 @@ public class StravaOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         return new DefaultOAuth2User(authorities, attributes, "athleteId");
     }
+
 }

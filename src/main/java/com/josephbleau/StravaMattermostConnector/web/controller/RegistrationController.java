@@ -22,24 +22,24 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/registration")
 public class RegistrationController {
 
-    private MattermostService mattermostService;
-    private UserDetailsRepository userDetailsRepository;
-    private VerificationCodeManager verificationCodeManager;
-    private ShareCodeManager shareCodeManager;
+    private final MattermostService mattermostService;
+    private final UserDetailsRepository userDetailsRepository;
+    private final VerificationCodeManager verificationCodeManager;
+    private final ShareCodeManager shareCodeManager;
 
     @Autowired
     public RegistrationController(
-            MattermostService mattermostService,
-            UserDetailsRepository userDetailsRepository,
-            VerificationCodeManager verificationCodeManager,
-            ShareCodeManager shareCodeManager) {
+            final MattermostService mattermostService,
+            final UserDetailsRepository userDetailsRepository,
+            final VerificationCodeManager verificationCodeManager,
+            final ShareCodeManager shareCodeManager) {
         this.verificationCodeManager = verificationCodeManager;
         this.mattermostService = mattermostService;
         this.userDetailsRepository = userDetailsRepository;
         this.shareCodeManager = shareCodeManager;
     }
 
-    private StravaTokenDetails getStravaTokenDetails(OAuth2User oAuth2User) {
+    private StravaTokenDetails getStravaTokenDetails(final OAuth2User oAuth2User) {
         StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
         stravaTokenDetails.setToken((String) oAuth2User.getAttribute("token"));
         stravaTokenDetails.setRefreshToken((String) oAuth2User.getAttribute("refreshToken"));
@@ -48,7 +48,9 @@ public class RegistrationController {
     }
 
     @GetMapping("/share")
-    public String share(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestParam("code") String code) {
+    public String share(
+            @AuthenticationPrincipal final OAuth2User oAuth2User,
+            @RequestParam("code") final String code) {
         MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
 
         UserDetails userDetails = new UserDetails(oAuth2User.getName(), false, mattermostDetails);
@@ -61,7 +63,7 @@ public class RegistrationController {
 
     @GetMapping("/config")
     public String config(Model model,
-                         @AuthenticationPrincipal OAuth2User oauth2User) {
+                         @AuthenticationPrincipal final OAuth2User oauth2User) {
         MattermostDetails mattermostDetails = new MattermostDetails();
 
         UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName());
@@ -82,9 +84,9 @@ public class RegistrationController {
 
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public String verify(Model model,
-                         @AuthenticationPrincipal OAuth2User oAuth2User,
+                         @AuthenticationPrincipal final OAuth2User oAuth2User,
                          @ModelAttribute MattermostDetails mattermostDetails,
-                         @RequestParam(value = "error", required = false) String error)  {
+                         @RequestParam(value = "error", required = false) final String error)  {
 
         if (StringUtils.isEmpty(error)) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
@@ -112,8 +114,8 @@ public class RegistrationController {
     }
 
     @PostMapping("/check")
-    public String check(@AuthenticationPrincipal OAuth2User oAuth2User,
-                        @ModelAttribute VerificationCodeDTO verificationCode) {
+    public String check(@AuthenticationPrincipal final OAuth2User oAuth2User,
+                        @ModelAttribute final VerificationCodeDTO verificationCode) {
         if (verificationCodeManager.verify(verificationCode.getCode())) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
             userDetails.setVerified(true);
@@ -128,8 +130,8 @@ public class RegistrationController {
 
     @GetMapping("/end")
     public String endNewUser(Model model,
-                             @AuthenticationPrincipal OAuth2User oAuth2User,
-                             HttpServletRequest request) {
+                             @AuthenticationPrincipal final OAuth2User oAuth2User,
+                             final HttpServletRequest request) {
         String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
         model.addAttribute("shareSettingsLink", baseUrl + "/registration/share?code=" + shareCodeManager.getCode(oAuth2User.getName()));
         return "registration/end";
@@ -137,9 +139,9 @@ public class RegistrationController {
 
     @PostMapping("/end")
     public String endExistingUser(Model model,
-                                  @AuthenticationPrincipal OAuth2User oAuth2User,
-                                  @ModelAttribute MattermostDetails mattermostDetails,
-                                  HttpServletRequest request) {
+                                  @AuthenticationPrincipal final OAuth2User oAuth2User,
+                                  @ModelAttribute final MattermostDetails mattermostDetails,
+                                  final HttpServletRequest request) {
         UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
         userDetails.setMattermostDetails(mattermostDetails);
         userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
@@ -149,4 +151,5 @@ public class RegistrationController {
         model.addAttribute("shareSettingsLink", baseUrl + "/registration/share?code=" + shareCodeManager.getCode(oAuth2User.getName()));
         return "registration/end";
     }
+
 }

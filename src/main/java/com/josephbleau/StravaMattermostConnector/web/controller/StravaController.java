@@ -18,16 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/strava")
 public class StravaController {
 
-    private MattermostService mattermostService;
-    private StravaApiService stravaApiService;
-    private StravaSubscriptionService stravaSubscriptionService;
-    private UserDetailsRepository userDetailsRepository;
+    private final MattermostService mattermostService;
+    private final StravaApiService stravaApiService;
+    private final StravaSubscriptionService stravaSubscriptionService;
+    private final UserDetailsRepository userDetailsRepository;
 
     @Autowired
     public StravaController(
-            MattermostService mattermostService,
-            StravaApiService stravaApiService,
-            StravaSubscriptionService stravaSubscriptionService, UserDetailsRepository userDetailsRepository) {
+            final MattermostService mattermostService,
+            final StravaApiService stravaApiService,
+            final StravaSubscriptionService stravaSubscriptionService, UserDetailsRepository userDetailsRepository) {
         this.mattermostService = mattermostService;
         this.stravaApiService = stravaApiService;
         this.stravaSubscriptionService = stravaSubscriptionService;
@@ -39,7 +39,7 @@ public class StravaController {
      */
     @PostMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
-    public void event(@RequestBody StravaEventRequestDTO request) {
+    public void event(@RequestBody final StravaEventRequestDTO request) {
         if (StravaObjectTypeDTO.activity.equals(request.getObjectType())) {
             if (userDetailsRepository.getUser(String.valueOf(request.getOwnerId())).isVerified()) {
                 StravaActivity activity = stravaApiService.getActivityForAthlete(request.getObjectId(), request.getOwnerId().intValue());
@@ -57,9 +57,9 @@ public class StravaController {
     @GetMapping(path = "/event")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody StravaWebookChallengeResponseDTO createWebhookSubscription(
-            @RequestParam("hub.mode") String mode,
-            @RequestParam("hub.challenge") String challenge,
-            @RequestParam("hub.verify_token") String token) {
+            @RequestParam("hub.mode") final String mode,
+            @RequestParam("hub.challenge") final String challenge,
+            @RequestParam("hub.verify_token") final String token) {
 
         if (stravaSubscriptionService.verifySubscriptionToken(token)) {
             return new StravaWebookChallengeResponseDTO(challenge);
@@ -67,4 +67,5 @@ public class StravaController {
 
         return null;
     }
+
 }

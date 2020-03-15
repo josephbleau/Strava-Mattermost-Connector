@@ -16,14 +16,12 @@ import java.util.Collections;
 
 @Service
 public class MattermostService {
-    @Value("${mattermost.user.name}")
-    private String mmUsername;
 
-    @Value("${mattermost.user.icon-url}")
-    private String mmUserIconUrl;
+    private final String mmUsername;
+    private final String mmUserIconUrl;
 
-    private UserDetailsRepository userDetailsRepository;
-    private StaticMapService staticMapService;
+    private final UserDetailsRepository userDetailsRepository;
+    private final StaticMapService staticMapService;
 
     private static final String attachmentTemplate = "**%s**\n" +
             "\n" +
@@ -32,13 +30,19 @@ public class MattermostService {
             "* **Duration:** %dh %02dm\n";
 
     @Autowired
-    public MattermostService(UserDetailsRepository userDetailsRepository, StaticMapService staticMapService) {
+    public MattermostService(
+            @Value("${mattermost.user.name}") final String mmUsername,
+            @Value("${mattermost.user.icon-url}") final String mmUserIconUrl,
+            final UserDetailsRepository userDetailsRepository,
+            final StaticMapService staticMapService) {
+        this.mmUsername = mmUsername;
+        this.mmUserIconUrl = mmUserIconUrl;
         this.userDetailsRepository = userDetailsRepository;
         this.staticMapService = staticMapService;
     }
 
 
-    private IncomingWebhookRequest activityPayload(StravaAthlete athlete, StravaActivity activity) {
+    private IncomingWebhookRequest activityPayload(final StravaAthlete athlete, final StravaActivity activity) {
         String text = String.format("%s completed a new activity!", athlete.getFirstname());
 
         int hours = activity.getMovingTime() / 60 / 60;
@@ -68,7 +72,7 @@ public class MattermostService {
         return payload;
     }
 
-    public void postActivity(StravaAthlete athlete, StravaActivity activity) {
+    public void postActivity(final StravaAthlete athlete, final StravaActivity activity) {
         String athleteId = String.valueOf(activity.getAthlete().getId());
 
         IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteId));
@@ -77,8 +81,8 @@ public class MattermostService {
         incomingWebhookClient.postByIncomingWebhook(payload);
     }
 
-    public String sendVerificationCode(MattermostDetails mattermostDetails, String verificationCode) {
-        String message = String.format("Hey there, this is the Strava Mattermost Connector. Here is your verification code: %s", verificationCode);
+    public String sendVerificationCode(final MattermostDetails mattermostDetails, final String verificationCode) {
+        final String message = String.format("Hey there, this is the Strava Mattermost Connector. Here is your verification code: %s", verificationCode);
 
         IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(mattermostDetails.getWebookUrl());
 
@@ -93,7 +97,8 @@ public class MattermostService {
         return verificationCode;
     }
 
-    private String getMattermostPostEndpoint(String athleteKey) {
+    private String getMattermostPostEndpoint(final String athleteKey) {
         return userDetailsRepository.getUser(athleteKey).getMattermostDetails().getWebookUrl();
     }
+
 }

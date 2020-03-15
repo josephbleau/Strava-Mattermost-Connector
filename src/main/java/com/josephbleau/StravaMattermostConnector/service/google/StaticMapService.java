@@ -12,10 +12,10 @@ import java.util.Arrays;
 
 @Service
 public class StaticMapService {
-    private String apiKey;
+    private final String apiKey;
 
     @Autowired
-    public StaticMapService(@Value("${google.api-key}") String apiKey) {
+    public StaticMapService(@Value("${google.api-key}") final String apiKey) {
         this.apiKey = apiKey;
     }
 
@@ -29,4 +29,5 @@ public class StaticMapService {
 
         return map.toString();
     }
+
 }

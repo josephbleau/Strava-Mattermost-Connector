@@ -7,6 +7,7 @@ import javastrava.auth.ref.AuthorisationScope;
 import javastrava.model.StravaActivity;
 import javastrava.model.StravaAthlete;
 import javastrava.service.Strava;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -14,13 +15,14 @@ import java.util.Arrays;
 @Service
 public class StravaApiService {
 
-    private UserDetailsRepository userDetailsRepository;
+    private final UserDetailsRepository userDetailsRepository;
 
-    public StravaApiService(UserDetailsRepository userDetailsRepository) {
+    @Autowired
+    public StravaApiService(final UserDetailsRepository userDetailsRepository) {
         this.userDetailsRepository = userDetailsRepository;
     }
 
-    private Strava strava(int athleteId) {
+    private Strava strava(final int athleteId) {
         UserDetails userDetails = userDetailsRepository.getUser(String.valueOf(athleteId));
         String stravaToken = userDetails.getStravaTokenDetails().getToken();
 
@@ -37,11 +39,12 @@ public class StravaApiService {
     }
 
 
-    public StravaActivity getActivityForAthlete(long activityId, int athleteId) {
+    public StravaActivity getActivityForAthlete(final long activityId, final int athleteId) {
         return strava(athleteId).getActivity(activityId);
     }
 
-    public StravaAthlete getAthlete(int athleteId) {
+    public StravaAthlete getAthlete(final int athleteId) {
         return strava(athleteId).getAthlete(athleteId);
     }
+
 }

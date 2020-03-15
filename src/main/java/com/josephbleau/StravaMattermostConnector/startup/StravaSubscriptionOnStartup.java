@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class StravaSubscriptionOnStartup  implements ApplicationListener<ContextRefreshedEvent> {
 
-    private StravaSubscriptionService stravaSubscriptionService;
+    private final StravaSubscriptionService stravaSubscriptionService;
 
     @Autowired
-    public StravaSubscriptionOnStartup(StravaSubscriptionService stravaSubscriptionService) {
+    public StravaSubscriptionOnStartup(final StravaSubscriptionService stravaSubscriptionService) {
         this.stravaSubscriptionService = stravaSubscriptionService;
     }
 
@@ -24,4 +24,5 @@ public class StravaSubscriptionOnStartup  implements ApplicationListener<Context
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
 
     }
+
 }

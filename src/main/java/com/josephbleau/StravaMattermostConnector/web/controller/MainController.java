@@ -9,15 +9,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/")
 public class MainController {
+
     @GetMapping
     public String index(
             Model model,
-            @RequestParam(value = "settings", required = false) String settings) {
+            final @RequestParam(value = "settings", required = false) String settings) {
+
         if(settings != null) {
             model.addAttribute("settings", settings);
         } else {
             model.addAttribute("settings", "");
         }
+
         return "index";
     }
+
 }

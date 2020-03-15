@@ -21,8 +21,8 @@ public class ShareCodeManager {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public ShareCodeManager(UserDetailsRepository userDetailsRepository,
-                            @Value("${connector.encryption-key}") String encryptionKey) {
+    public ShareCodeManager(final UserDetailsRepository userDetailsRepository,
+                            @Value("${connector.encryption-key}") final String encryptionKey) {
         this.userDetailsRepository = userDetailsRepository;
 
         basicTextEncryptor = new BasicTextEncryptor();
@@ -36,7 +36,7 @@ public class ShareCodeManager {
      * other users and provided to the endpoint /registration/share?code={code} and can be used to register new
      * users with the connector without revealing the mattermost hook token.
      */
-    public String getCode(String athleteId)  {
+    public String getCode(final String athleteId)  {
         UserDetails userDetails = userDetailsRepository.getUser(athleteId);
         MattermostDetails mattermostDetails = userDetails.getMattermostDetails();
 
@@ -53,7 +53,7 @@ public class ShareCodeManager {
     /**
      * @return mattermost settings after decrypting and deserializing the given code.
      */
-    public MattermostDetails getSettings(String code) {
+    public MattermostDetails getSettings(final String code) {
        byte[] decoded = Base64.getUrlDecoder().decode(code.getBytes());
 
         try {
@@ -65,4 +65,5 @@ public class ShareCodeManager {
             throw new RuntimeException("Something happened when converting our code back into matter most details: " + e.getMessage());
         }
     }
+
 }

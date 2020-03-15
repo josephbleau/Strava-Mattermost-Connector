@@ -9,20 +9,27 @@ import java.util.Random;
 @Component
 @Scope(value="session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class VerificationCodeManager {
-    private int length;
-    private char[] characters;
-    private String code;
+
+    private final int length;
+    private final char[] characters;
+    private final String code;
 
     public VerificationCodeManager() {
         this.length = 4;
         this.characters = new char[]{'S','T','R','V','A', '1', '2','3','4','5'};
-        this.code = generateCode(this.length, this.characters);
+        this.code = generateCode();
+    }
+
+    protected VerificationCodeManager(final int length, final char[] characters, final String code) {
+        this.length = length;
+        this.characters = characters;
+        this.code = code;
     }
 
     /**
      * Generate a random four digit code.
      */
-    protected String generateCode(int length, char[] characters) {
+    protected String generateCode() {
         StringBuilder code = new StringBuilder();
         Random random = new Random();
 
@@ -40,4 +47,5 @@ public class VerificationCodeManager {
     public String getCode() {
         return this.code;
     }
+
 }
