@@ -97,14 +97,4 @@ public class RegistrationController {
 
         return "registration/end";
     }
-
-    /**
-     * If during token exchange (code for auth token) an error occurs then we will fail silently and redirect the user
-     * back to the main page. This should only occur when the token has been previously consumed (user is pressing back
-     * or refreshing at an inappropriate time).
-     */
-    @ExceptionHandler({RetrofitError.class})
-    public String tokenExchangeError() {
-        return "index";
-    }
 }
