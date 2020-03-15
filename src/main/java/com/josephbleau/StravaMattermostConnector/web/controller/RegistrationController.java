@@ -1,10 +1,11 @@
 package com.josephbleau.StravaMattermostConnector.web.controller;
 
-import com.josephbleau.StravaMattermostConnector.config.auth.VerificationCodeManager;
 import com.josephbleau.StravaMattermostConnector.model.MattermostDetails;
 import com.josephbleau.StravaMattermostConnector.model.UserDetails;
 import com.josephbleau.StravaMattermostConnector.repository.UserDetailsRepository;
 import com.josephbleau.StravaMattermostConnector.service.mattermost.MattermostService;
+import com.josephbleau.StravaMattermostConnector.service.registration.ShareCodeManager;
+import com.josephbleau.StravaMattermostConnector.service.registration.VerificationCodeManager;
 import com.josephbleau.StravaMattermostConnector.web.dto.VerificationCodeDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Controller
 @RequestMapping("/registration")
 public class RegistrationController {
@@ -21,27 +24,41 @@ public class RegistrationController {
     private MattermostService mattermostService;
     private UserDetailsRepository userDetailsRepository;
     private VerificationCodeManager verificationCodeManager;
+    private ShareCodeManager shareCodeManager;
 
     @Autowired
     public RegistrationController(
             MattermostService mattermostService,
-            UserDetailsRepository userDetailsRepository, VerificationCodeManager verificationCodeManager) {
+            UserDetailsRepository userDetailsRepository,
+            VerificationCodeManager verificationCodeManager,
+            ShareCodeManager shareCodeManager) {
         this.verificationCodeManager = verificationCodeManager;
         this.mattermostService = mattermostService;
         this.userDetailsRepository = userDetailsRepository;
+        this.shareCodeManager = shareCodeManager;
     }
 
-    /**
-     * Callback that is invoked when a user authorizes our application.
-     */
+    @GetMapping("/share")
+    public String share(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestParam("code") String code) {
+        MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
+        UserDetails userDetails = new UserDetails(oAuth2User.getName(), false, mattermostDetails);
+        userDetailsRepository.saveUser(userDetails);
+
+        return "redirect:/registration/config";
+    }
+
     @GetMapping("/config")
-    public String config(@AuthenticationPrincipal OAuth2User oauth2User, Model model) {
+    public String config(Model model,
+                         @AuthenticationPrincipal OAuth2User oauth2User) {
         MattermostDetails mattermostDetails = new MattermostDetails();
 
         UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName());
         if (userDetails != null && userDetails.isVerified()) {
             mattermostDetails = userDetails.getMattermostDetails();
             model.addAttribute("nextStep", "/registration/end");
+        } else if (userDetails != null && !userDetails.isVerified() && userDetails.getMattermostDetails().getHidden()) {
+            mattermostDetails = userDetails.getMattermostDetails();
+            model.addAttribute("nextStep", "/registration/verify");
         } else {
             model.addAttribute("nextStep", "/registration/verify");
         }
@@ -52,16 +69,23 @@ public class RegistrationController {
     }
 
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
-    public String verify(@AuthenticationPrincipal OAuth2User oAuth2User, Model model, @ModelAttribute MattermostDetails mattermostDetails, @RequestParam(value = "error", required = false) String error)  {
+    public String verify(Model model,
+                         @AuthenticationPrincipal OAuth2User oAuth2User,
+                         @ModelAttribute MattermostDetails mattermostDetails,
+                         @RequestParam(value = "error", required = false) String error)  {
 
         if (StringUtils.isEmpty(error)) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
+            MattermostDetails hiddenMatterMostDetails = userDetails.getMattermostDetails();
+
             userDetails.setAthleteKey(oAuth2User.getName());
             userDetails.setVerified(false);
+            mattermostDetails.setHidden(hiddenMatterMostDetails.getHidden());
             userDetails.setMattermostDetails(mattermostDetails);
+
             userDetailsRepository.saveUser(userDetails);
 
-            mattermostService.sendVerificationCode(mattermostDetails, verificationCodeManager.getCode());
+            mattermostService.sendVerificationCode(hiddenMatterMostDetails, verificationCodeManager.getCode());
         }
 
         model.addAttribute("error", error);
@@ -71,7 +95,8 @@ public class RegistrationController {
     }
 
     @PostMapping("/check")
-    public String check(Model model, @AuthenticationPrincipal OAuth2User oAuth2User, @ModelAttribute VerificationCodeDTO verificationCode) {
+    public String check(@AuthenticationPrincipal OAuth2User oAuth2User,
+                        @ModelAttribute VerificationCodeDTO verificationCode) {
         if (verificationCodeManager.verify(verificationCode.getCode())) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
             userDetails.setVerified(true);
@@ -84,16 +109,25 @@ public class RegistrationController {
     }
 
     @GetMapping("/end")
-    public String endNewUser() {
+    public String endNewUser(Model model,
+                             @AuthenticationPrincipal OAuth2User oAuth2User,
+                             HttpServletRequest request) {
+        String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
+        model.addAttribute("shareSettingsLink", baseUrl + "/registration/share?code=" + shareCodeManager.getCode(oAuth2User.getName()));
         return "registration/end";
     }
 
     @PostMapping("/end")
-    public String endExistingUser(@AuthenticationPrincipal OAuth2User oAuth2User, @ModelAttribute MattermostDetails mattermostDetails) {
+    public String endExistingUser(Model model,
+                                  @AuthenticationPrincipal OAuth2User oAuth2User,
+                                  @ModelAttribute MattermostDetails mattermostDetails,
+                                  HttpServletRequest request) {
         UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
         userDetails.setMattermostDetails(mattermostDetails);
         userDetailsRepository.saveUser(userDetails);
 
+        String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
+        model.addAttribute("shareSettingsLink", baseUrl + "/registration/share?code=" + shareCodeManager.getCode(oAuth2User.getName()));
         return "registration/end";
     }
 }

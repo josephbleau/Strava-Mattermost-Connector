@@ -16,7 +16,7 @@ public class UserDetailsRepository {
     private JedisPool jedisPool;
 
     private String[] userDetailFields = new String[]{
-            "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:team-name", "mattermost:channel-name", "mattermost:user-name"
+            "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token", "mattermost:team-name", "mattermost:channel-name", "mattermost:user-name", "mattermost:hidden"
     };
 
     @Autowired
@@ -35,13 +35,30 @@ public class UserDetailsRepository {
             throw new NullPointerException("MattermostDetails inside of UserDetails cannot be null.");
         }
 
+
+        if ( userDetails.getMattermostDetails().getHost() != null) {
+            userDetailsMap.put(userDetailFields[2], userDetails.getMattermostDetails().getHost());
+        }
+
+        if (userDetails.getMattermostDetails().getPort() != null) {
+            userDetailsMap.put(userDetailFields[3], userDetails.getMattermostDetails().getPort());
+        }
+
+        if (userDetails.getMattermostDetails().getHookToken() != null) {
+            userDetailsMap.put(userDetailFields[4], userDetails.getMattermostDetails().getHookToken());
+        }
+
+        if (userDetails.getMattermostDetails().getTeamName() != null) {
+            userDetailsMap.put(userDetailFields[5], userDetails.getMattermostDetails().getTeamName());
+        }
+
+        if (userDetails.getMattermostDetails().getChannelName() != null) {
+            userDetailsMap.put(userDetailFields[6], userDetails.getMattermostDetails().getChannelName());
+        }
+
         userDetailsMap.put(userDetailFields[0], String.valueOf(userDetails.isVerified()));
-        userDetailsMap.put(userDetailFields[2], userDetails.getMattermostDetails().getHost());
-        userDetailsMap.put(userDetailFields[3], userDetails.getMattermostDetails().getPort());
-        userDetailsMap.put(userDetailFields[4], userDetails.getMattermostDetails().getHookToken());
-        userDetailsMap.put(userDetailFields[5], userDetails.getMattermostDetails().getTeamName());
-        userDetailsMap.put(userDetailFields[6], userDetails.getMattermostDetails().getChannelName());
         userDetailsMap.put(userDetailFields[7], userDetails.getMattermostDetails().getUserName());
+        userDetailsMap.put(userDetailFields[8], String.valueOf(userDetails.getMattermostDetails().getHidden()));
 
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.hmset("user:" + userDetails.getAthleteKey(), userDetailsMap);
@@ -64,6 +81,8 @@ public class UserDetailsRepository {
                     userDetailValues.get(6),
                     userDetailValues.get(7)
             );
+
+            mattermostDetails.setHidden(Boolean.valueOf(userDetailValues.get(8)));
 
             Boolean verified = Boolean.valueOf(userDetailValues.get(0));
 

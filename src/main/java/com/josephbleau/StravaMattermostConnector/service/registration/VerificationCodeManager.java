@@ -1,4 +1,4 @@
-package com.josephbleau.StravaMattermostConnector.config.auth;
+package com.josephbleau.StravaMattermostConnector.service.registration;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
