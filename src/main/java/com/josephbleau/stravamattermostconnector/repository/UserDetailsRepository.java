@@ -117,4 +117,10 @@ public class UserDetailsRepository {
         }
     }
 
+    public void deleteUser(String athleteKey) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.del("user:" + athleteKey);
+        }
+    }
+
 }

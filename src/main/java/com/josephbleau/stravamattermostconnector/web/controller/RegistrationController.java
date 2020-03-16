@@ -42,7 +42,7 @@ public class RegistrationController {
             final MattermostService mattermostService,
             final UserDetailsRepository userDetailsRepository,
             final VerificationCodeManager verificationCodeManager,
-            final ShareCodeManager shareCodeManager, OAuth2AuthorizedClientRepository clientRepository) {
+            final ShareCodeManager shareCodeManager) {
         this.verificationCodeManager = verificationCodeManager;
         this.mattermostService = mattermostService;
         this.userDetailsRepository = userDetailsRepository;
@@ -155,6 +155,17 @@ public class RegistrationController {
         String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
         model.addAttribute("shareSettingsLink", baseUrl + "/registration/share?code=" + shareCodeManager.getCode(oAuth2User.getName()));
         return "registration/end";
+    }
+
+    @GetMapping("/remove")
+    public String removeUser() {
+        return "/registration/remove";
+    }
+
+    @GetMapping("/removed")
+    public String userRemoved(@AuthenticationPrincipal final OAuth2User oAuth2User) {
+        userDetailsRepository.deleteUser(oAuth2User.getName());
+        return "/registration/removed";
     }
 
     private StravaTokenDetails getTokenDetails(HttpServletRequest servletRequest) {
