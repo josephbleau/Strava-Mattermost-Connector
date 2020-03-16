@@ -10,6 +10,7 @@ import com.josephbleau.stravamattermostconnector.service.registration.Verificati
 import com.josephbleau.stravamattermostconnector.web.dto.VerificationCodeDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +32,10 @@ public class RegistrationController {
     private final UserDetailsRepository userDetailsRepository;
     private final VerificationCodeManager verificationCodeManager;
     private final ShareCodeManager shareCodeManager;
-    private final OAuth2AuthorizedClientRepository clientRepository;
+
+    @Autowired
+    @Lazy
+    private OAuth2AuthorizedClientRepository clientRepository;
 
     @Autowired
     public RegistrationController(
@@ -43,7 +47,6 @@ public class RegistrationController {
         this.mattermostService = mattermostService;
         this.userDetailsRepository = userDetailsRepository;
         this.shareCodeManager = shareCodeManager;
-        this.clientRepository = clientRepository;
     }
 
     @GetMapping("/share")
