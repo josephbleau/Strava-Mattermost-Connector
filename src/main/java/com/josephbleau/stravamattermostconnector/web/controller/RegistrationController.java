@@ -10,7 +10,11 @@ import com.josephbleau.stravamattermostconnector.service.registration.Verificati
 import com.josephbleau.stravamattermostconnector.web.dto.VerificationCodeDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,35 +31,30 @@ public class RegistrationController {
     private final UserDetailsRepository userDetailsRepository;
     private final VerificationCodeManager verificationCodeManager;
     private final ShareCodeManager shareCodeManager;
+    private final OAuth2AuthorizedClientRepository clientRepository;
 
     @Autowired
     public RegistrationController(
             final MattermostService mattermostService,
             final UserDetailsRepository userDetailsRepository,
             final VerificationCodeManager verificationCodeManager,
-            final ShareCodeManager shareCodeManager) {
+            final ShareCodeManager shareCodeManager, OAuth2AuthorizedClientRepository clientRepository) {
         this.verificationCodeManager = verificationCodeManager;
         this.mattermostService = mattermostService;
         this.userDetailsRepository = userDetailsRepository;
         this.shareCodeManager = shareCodeManager;
-    }
-
-    private StravaTokenDetails getStravaTokenDetails(final OAuth2User oAuth2User) {
-        StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
-        stravaTokenDetails.setToken(oAuth2User.getAttribute("token"));
-        stravaTokenDetails.setRefreshToken(oAuth2User.getAttribute("refreshToken"));
-        stravaTokenDetails.setExpiresAt(oAuth2User.getAttribute("expiresAt"));
-        return stravaTokenDetails;
+        this.clientRepository = clientRepository;
     }
 
     @GetMapping("/share")
     public String share(
             @AuthenticationPrincipal final OAuth2User oAuth2User,
-            @RequestParam("code") final String code) {
+            @RequestParam("code") final String code,
+            final HttpServletRequest request) {
         MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
 
         UserDetails userDetails = new UserDetails(oAuth2User.getName(), false, mattermostDetails);
-        userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
+        userDetails.setStravaTokenDetails(getTokenDetails(request));
 
         userDetailsRepository.saveUser(userDetails);
 
@@ -87,7 +86,8 @@ public class RegistrationController {
     public String verify(Model model,
                          @AuthenticationPrincipal final OAuth2User oAuth2User,
                          @ModelAttribute MattermostDetails mattermostDetails,
-                         @RequestParam(value = "error", required = false) final String error)  {
+                         @RequestParam(value = "error", required = false) final String error,
+                         HttpServletRequest request)  {
 
         if (StringUtils.isEmpty(error)) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
@@ -97,7 +97,7 @@ public class RegistrationController {
             userDetails.setVerified(false);
             mattermostDetails.setHidden(hiddenMatterMostDetails.getHidden());
             userDetails.setMattermostDetails(mattermostDetails);
-            userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
+            userDetails.setStravaTokenDetails(getTokenDetails(request));
 
             userDetailsRepository.saveUser(userDetails);
 
@@ -116,11 +116,12 @@ public class RegistrationController {
 
     @PostMapping("/check")
     public String check(@AuthenticationPrincipal final OAuth2User oAuth2User,
-                        @ModelAttribute final VerificationCodeDTO verificationCode) {
+                        @ModelAttribute final VerificationCodeDTO verificationCode,
+                        final HttpServletRequest request) {
         if (verificationCodeManager.verify(verificationCode.getCode())) {
             UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
             userDetails.setVerified(true);
-            userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
+            userDetails.setStravaTokenDetails(getTokenDetails(request));
             userDetailsRepository.saveUser(userDetails);
 
             return "redirect:/registration/end";
@@ -145,7 +146,7 @@ public class RegistrationController {
                                   final HttpServletRequest request) {
         UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
         userDetails.setMattermostDetails(mattermostDetails);
-        userDetails.setStravaTokenDetails(getStravaTokenDetails(oAuth2User));
+        userDetails.setStravaTokenDetails(getTokenDetails(request));
         userDetailsRepository.saveUser(userDetails);
 
         String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
@@ -153,4 +154,20 @@ public class RegistrationController {
         return "registration/end";
     }
 
+    private StravaTokenDetails getTokenDetails(HttpServletRequest servletRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        OAuth2AuthorizedClient client = this.clientRepository.loadAuthorizedClient(
+                        "strava",
+                        authentication,
+                        servletRequest
+        );
+
+        StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
+        stravaTokenDetails.setToken(client.getAccessToken().getTokenValue());
+        stravaTokenDetails.setRefreshToken(client.getRefreshToken().getTokenValue());
+        stravaTokenDetails.setExpiresAt(client.getAccessToken().getExpiresAt().toEpochMilli());
+
+        return stravaTokenDetails;
+    }
 }
