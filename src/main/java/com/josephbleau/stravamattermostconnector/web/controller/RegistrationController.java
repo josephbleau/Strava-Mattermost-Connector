@@ -159,13 +159,13 @@ public class RegistrationController {
 
     @GetMapping("/remove")
     public String removeUser() {
-        return "/registration/remove";
+        return "registration/remove";
     }
 
     @GetMapping("/removed")
     public String userRemoved(@AuthenticationPrincipal final OAuth2User oAuth2User) {
         userDetailsRepository.deleteUser(oAuth2User.getName());
-        return "/registration/removed";
+        return "registration/removed";
     }
 
     private StravaTokenDetails getTokenDetails(HttpServletRequest servletRequest) {
