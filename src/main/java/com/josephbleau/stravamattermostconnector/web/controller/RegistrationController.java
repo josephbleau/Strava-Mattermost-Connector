@@ -180,7 +180,7 @@ public class RegistrationController {
         StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
         stravaTokenDetails.setToken(client.getAccessToken().getTokenValue());
         stravaTokenDetails.setRefreshToken(client.getRefreshToken().getTokenValue());
-        stravaTokenDetails.setExpiresAt(client.getAccessToken().getExpiresAt().toEpochMilli());
+        stravaTokenDetails.setExpiresAt(client.getAccessToken().getExpiresAt().toEpochMilli() / 1000);
 
         return stravaTokenDetails;
     }

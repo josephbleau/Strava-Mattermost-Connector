@@ -42,9 +42,6 @@ public class StravaOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         attributes.put("athleteId", athleteId);
-        attributes.put("token", userRequest.getAccessToken().getTokenValue());
-        attributes.put("refreshToken", "gotta figure out to get this");
-        attributes.put("expiresAt", Objects.requireNonNull(userRequest.getAccessToken().getExpiresAt()).toEpochMilli());
 
         return new DefaultOAuth2User(authorities, attributes, "athleteId");
     }
