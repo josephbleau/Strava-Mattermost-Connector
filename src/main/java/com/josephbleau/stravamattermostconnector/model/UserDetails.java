@@ -7,12 +7,6 @@ public class UserDetails {
     private MattermostDetails mattermostDetails;
     private StravaTokenDetails stravaTokenDetails;
 
-    public UserDetails(String athleteKey, boolean verified, MattermostDetails mattermostDetails) {
-        this.athleteKey = athleteKey;
-        this.verified = verified;
-        this.mattermostDetails = mattermostDetails;
-    }
-
     public String getAthleteKey() {
         return athleteKey;
     }

@@ -15,7 +15,8 @@ connector:
 
 spring:
   redis:
-    url: ${REDIS_URL}
+    host-name: ${REDIS_HOST_NAME}
+    port: ${REDIS_PORT}
   security:
     oauth2:
       client:
