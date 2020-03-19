@@ -4,18 +4,19 @@ import com.josephbleau.stravamattermostconnector.model.MattermostDetails;
 import com.josephbleau.stravamattermostconnector.model.StravaTokenDetails;
 import com.josephbleau.stravamattermostconnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class UserDetailsRepository {
 
     private final JedisPool jedisPool;
+    private final StringRedisTemplate stringRedisTemplate;
 
     private final String[] userDetailFields = new String[]{
             "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token",
@@ -24,8 +25,9 @@ public class UserDetailsRepository {
     };
 
     @Autowired
-    public UserDetailsRepository(final JedisPool jedisPool) {
+    public UserDetailsRepository(final JedisPool jedisPool, StringRedisTemplate stringRedisTemplate) {
         this.jedisPool = jedisPool;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     public void saveUser(UserDetails userDetails) {
@@ -82,39 +84,38 @@ public class UserDetailsRepository {
     }
 
     public UserDetails getUser(String athleteKey) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            List<String> userDetailValues = jedis.hmget("user:" + athleteKey, userDetailFields);
+        Map<Object, Object> storedDetails = stringRedisTemplate.opsForHash().entries("user:" + athleteKey);
 
-            if (userDetailValues == null || userDetailValues.size() < userDetailFields.length) {
-                return null;
-            }
+        UserDetails userDetails = new UserDetails();
+        MattermostDetails mattermostDetails = new MattermostDetails();
+        StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
 
-            MattermostDetails mattermostDetails = new MattermostDetails(
-                    userDetailValues.get(2),
-                    userDetailValues.get(3),
-                    userDetailValues.get(4),
-                    userDetailValues.get(5),
-                    userDetailValues.get(6),
-                    userDetailValues.get(7)
-            );
+        userDetails.setMattermostDetails(mattermostDetails);
+        userDetails.setStravaTokenDetails(stravaTokenDetails);
 
-            StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
-            stravaTokenDetails.setToken(userDetailValues.get(9));
-            stravaTokenDetails.setRefreshToken(userDetailValues.get(10));
-
-            if (userDetailValues.get(11) != null) {
-                stravaTokenDetails.setExpiresAt(Long.parseLong(userDetailValues.get(11)));
-            }
-
-            mattermostDetails.setHidden(Boolean.valueOf(userDetailValues.get(8)));
-
-            boolean verified = Boolean.parseBoolean(userDetailValues.get(0));
-
-            UserDetails userDetails = new UserDetails(athleteKey, verified, mattermostDetails);
-            userDetails.setStravaTokenDetails(stravaTokenDetails);
-
-            return userDetails;
+        if (storedDetails.containsKey("mattermost:hidden")) {
+            mattermostDetails.setHidden(Boolean.parseBoolean((String) storedDetails.get("mattermost:hidden")));
         }
+
+        if (storedDetails.containsKey("verified")) {
+            userDetails.setVerified(Boolean.parseBoolean((String) storedDetails.get("verified")));
+        }
+
+        if (storedDetails.containsKey("strava:expires-at")) {
+            stravaTokenDetails.setExpiresAt(Integer.parseInt((String) storedDetails.get("strava:expires-at")));
+        }
+
+        mattermostDetails.setChannelName((String) storedDetails.get("mattermost:channel-name"));
+        mattermostDetails.setHookToken((String) storedDetails.get("mattermost:hook-token"));
+        mattermostDetails.setHost((String) storedDetails.get("mattermost:url"));
+        mattermostDetails.setPort((String) storedDetails.get("mattermost:port"));
+        mattermostDetails.setTeamName((String) storedDetails.get("mattermost:team-name"));
+        mattermostDetails.setUserName((String) storedDetails.get("mattermost:user-name"));
+        stravaTokenDetails.setToken((String) storedDetails.get("strava:token"));
+        stravaTokenDetails.setRefreshToken((String) storedDetails.get("strava:refresh-token"));
+        userDetails.setAthleteKey(athleteKey);
+
+        return userDetails;
     }
 
     public void deleteUser(String athleteKey) {

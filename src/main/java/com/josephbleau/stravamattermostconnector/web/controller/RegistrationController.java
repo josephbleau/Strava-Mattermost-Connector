@@ -54,10 +54,14 @@ public class RegistrationController {
             @AuthenticationPrincipal final OAuth2User oAuth2User,
             @RequestParam("code") final String code,
             final HttpServletRequest request) {
-        MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
 
-        UserDetails userDetails = new UserDetails(oAuth2User.getName(), false, mattermostDetails);
+        UserDetails userDetails = new UserDetails();
+        MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
+        userDetails.setMattermostDetails(mattermostDetails);
         userDetails.setStravaTokenDetails(getTokenDetails(request));
+
+        userDetails.setAthleteKey(oAuth2User.getName());
+        userDetails.setVerified(false);
 
         userDetailsRepository.saveUser(userDetails);
 

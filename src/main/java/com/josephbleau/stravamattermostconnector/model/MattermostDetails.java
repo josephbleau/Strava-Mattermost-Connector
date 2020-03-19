@@ -15,16 +15,6 @@ public class MattermostDetails {
 
     public MattermostDetails() {}
 
-    public MattermostDetails(String host, String port, String hookToken, String teamName, String channelName, String userName) {
-        this.host = host;
-        this.port = port;
-        this.hookToken = hookToken;
-        this.teamName = teamName;
-        this.channelName = channelName;
-        this.userName = userName;
-        this.hidden = false;
-    }
-
     public String getHost() {
         return host;
     }
