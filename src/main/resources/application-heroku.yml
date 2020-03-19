@@ -17,6 +17,7 @@ spring:
   redis:
     host-name: ${REDIS_HOST_NAME}
     port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}}
   security:
     oauth2:
       client:
