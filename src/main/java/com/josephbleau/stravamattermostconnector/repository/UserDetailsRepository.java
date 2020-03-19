@@ -6,8 +6,6 @@ import com.josephbleau.stravamattermostconnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,18 +13,10 @@ import java.util.Map;
 @Service
 public class UserDetailsRepository {
 
-    private final JedisPool jedisPool;
     private final StringRedisTemplate stringRedisTemplate;
 
-    private final String[] userDetailFields = new String[]{
-            "verified", "strava:token", "mattermost:url", "mattermost:port", "mattermost:hook-token",
-            "mattermost:team-name", "mattermost:channel-name", "mattermost:user-name", "mattermost:hidden",
-            "strava:token", "strava:refresh-token", "strava:expires-at"
-    };
-
     @Autowired
-    public UserDetailsRepository(final JedisPool jedisPool, StringRedisTemplate stringRedisTemplate) {
-        this.jedisPool = jedisPool;
+    public UserDetailsRepository(final StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
@@ -41,46 +31,44 @@ public class UserDetailsRepository {
             throw new NullPointerException("MattermostDetails inside of UserDetails cannot be null.");
         }
 
-
         if ( userDetails.getMattermostDetails().getHost() != null) {
-            userDetailsMap.put(userDetailFields[2], userDetails.getMattermostDetails().getHost());
+            userDetailsMap.put("mattermost:url", userDetails.getMattermostDetails().getHost());
         }
 
         if (userDetails.getMattermostDetails().getPort() != null) {
-            userDetailsMap.put(userDetailFields[3], userDetails.getMattermostDetails().getPort());
+            userDetailsMap.put("mattermost:port", userDetails.getMattermostDetails().getPort());
         }
 
         if (userDetails.getMattermostDetails().getHookToken() != null) {
-            userDetailsMap.put(userDetailFields[4], userDetails.getMattermostDetails().getHookToken());
+            userDetailsMap.put("mattermost:hook-token", userDetails.getMattermostDetails().getHookToken());
         }
 
         if (userDetails.getMattermostDetails().getTeamName() != null) {
-            userDetailsMap.put(userDetailFields[5], userDetails.getMattermostDetails().getTeamName());
+            userDetailsMap.put("mattermost:team-name", userDetails.getMattermostDetails().getTeamName());
         }
 
         if (userDetails.getMattermostDetails().getChannelName() != null) {
-            userDetailsMap.put(userDetailFields[6], userDetails.getMattermostDetails().getChannelName());
+            userDetailsMap.put("mattermost:channel-name", userDetails.getMattermostDetails().getChannelName());
         }
 
-        userDetailsMap.put(userDetailFields[0], String.valueOf(userDetails.isVerified()));
-        userDetailsMap.put(userDetailFields[7], userDetails.getMattermostDetails().getUserName());
-        userDetailsMap.put(userDetailFields[8], String.valueOf(userDetails.getMattermostDetails().getHidden()));
+        userDetailsMap.put("verified", String.valueOf(userDetails.isVerified()));
+        userDetailsMap.put("mattermost:user-name", userDetails.getMattermostDetails().getUserName());
+        userDetailsMap.put("mattermost:hidden", String.valueOf(userDetails.getMattermostDetails().getHidden()));
 
         if (userDetails.getStravaTokenDetails() != null) {
             if (userDetails.getStravaTokenDetails().getToken() != null) {
-                userDetailsMap.put(userDetailFields[9],userDetails.getStravaTokenDetails().getToken() );
+                userDetailsMap.put("strava:token" ,userDetails.getStravaTokenDetails().getToken() );
             }
 
             if (userDetails.getStravaTokenDetails().getRefreshToken() != null) {
-                userDetailsMap.put(userDetailFields[10], userDetails.getStravaTokenDetails().getRefreshToken());
+                userDetailsMap.put("strava:refresh-token", userDetails.getStravaTokenDetails().getRefreshToken());
             }
 
-            userDetailsMap.put(userDetailFields[11], String.valueOf(userDetails.getStravaTokenDetails().getExpiresAt()));
+            userDetailsMap.put("strava:expires-at", String.valueOf(userDetails.getStravaTokenDetails().getExpiresAt()));
         }
 
-        try (Jedis jedis = jedisPool.getResource()) {
-            jedis.hmset("user:" + userDetails.getAthleteKey(), userDetailsMap);
-        }
+        stringRedisTemplate.opsForHash().putAll("user:" + userDetails.getAthleteKey(), userDetailsMap);
+
     }
 
     public UserDetails getUser(String athleteKey) {
@@ -119,9 +107,7 @@ public class UserDetailsRepository {
     }
 
     public void deleteUser(String athleteKey) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            jedis.del("user:" + athleteKey);
-        }
+        stringRedisTemplate.delete("user:"+athleteKey);
     }
 
 }

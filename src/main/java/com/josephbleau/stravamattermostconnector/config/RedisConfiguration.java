@@ -6,11 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @Configuration
 public class RedisConfiguration {
@@ -23,13 +18,6 @@ public class RedisConfiguration {
             @Value("${spring.redis.port}") final int port) {
         this.hostName = hostName;
         this.port = port;
-    }
-
-    @Bean
-    public JedisPool jedisPool() throws URISyntaxException {
-        URI redisURI = new URI("redis://"+hostName+":"+port);
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        return new JedisPool(poolConfig, redisURI);
     }
 
     @Bean

@@ -74,10 +74,11 @@ public class RegistrationController {
         MattermostDetails mattermostDetails = new MattermostDetails();
 
         UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName());
+
         if (userDetails != null && userDetails.isVerified()) {
             mattermostDetails = userDetails.getMattermostDetails();
             model.addAttribute("nextStep", "/registration/end");
-        } else if (userDetails != null && !userDetails.isVerified() && userDetails.getMattermostDetails().getHidden()) {
+        } else if (userDetails != null && !userDetails.isVerified() && userDetails.getMattermostDetails().getHidden() != null && userDetails.getMattermostDetails().getHidden()) {
             mattermostDetails = userDetails.getMattermostDetails();
             model.addAttribute("nextStep", "/registration/verify");
         } else {
@@ -108,7 +109,7 @@ public class RegistrationController {
 
             userDetailsRepository.saveUser(userDetails);
 
-            if (mattermostDetails.getHidden()) {
+            if (mattermostDetails.getHidden() != null && mattermostDetails.getHidden()) {
                 mattermostService.sendVerificationCode(hiddenMatterMostDetails, verificationCodeManager.getCode());
             } else {
                 mattermostService.sendVerificationCode(mattermostDetails, verificationCodeManager.getCode());
