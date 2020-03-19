@@ -42,7 +42,6 @@ public class RedisConfiguration {
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(jedisConnectionFactory());
 
-
         return stringRedisTemplate;
     }
 
