@@ -19,11 +19,9 @@
         <h1><a class="strava-orange" th:href="@{/}">Strava Mattermost Connector</a></h1>
         <h3>Delete your details</h3>
         <p>Click the button below if you want to reset your configuration details or remove your link to the service.</p>
-        <div class="text-center" style="margin: 50px;">
-            <a th:href="@{/registration/removed}">
-                <button type="button" class="strava-btn-deemph">Remove my configuration</button>
-            </a>
-        </div>
+        <a th:href="@{/registration/removed}">
+            <button type="button" class="strava-btn-deemph">Remove my configuration</button>
+        </a>
     </div>
 </div>
 </body>
