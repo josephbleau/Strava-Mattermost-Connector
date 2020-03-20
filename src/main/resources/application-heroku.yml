@@ -6,7 +6,9 @@ mattermost:
 strava:
   subscription.id: ${SUBSCRIPTION_ID}
   subscription:
-    verify-token: STRAVA
+    verify-token: ${VERIFY_TOKEN}
+    callback-url: https://strava-mattermost-connector.herokuapp.com/strava/event
+    subscribe-on-start-up: false
 
 connector:
   base-url: https://strava-mattermost-connector.herokuapp.com
