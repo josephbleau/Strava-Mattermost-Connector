@@ -8,7 +8,7 @@ strava:
   subscription:
     verify-token: ${VERIFY_TOKEN}
     callback-url: https://strava-mattermost-connector.herokuapp.com/strava/event
-    subscribe-on-start-up: false
+    subscribe-on-start-up: true
 
 connector:
   base-url: https://strava-mattermost-connector.herokuapp.com
