@@ -8,14 +8,15 @@
           integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css"
           integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/strava.css"/>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="row'">
-    <div class="col-md-4">
-        <h1><a th:href="@{/}">Strava Mattermost Connector</a></h1>
+    <div class="col-md-12">
+        <h1><a class="strava-orange" th:href="@{/}">Strava Mattermost Connector</a></h1>
         <h3>Automatically post your new activities to your favorite Mattermost chat channel.</h3>
         <p>This application will ask you to authorize it with Strava and provide the following permissions:</p>
         <ul>
@@ -25,16 +26,22 @@
         <p>Note: Authorizing the application to view data about your private activities will allow it to read activities you have designated as visible to only you.</p>
         <h3>Questions, comments, concerns...</h3>
         <p>Feel free to reach out via the <a href="https://github.com/josephbleau/Strava-Mattermost-Connector/issues">issues section on github</a>! Or if you'd like you <a href="mailto:jbleau+stravamm@gmail.com">can email me.</a></p>
+    </div>
+    <div class="col-md-6">
+        <h3>New or Existing User</h3>
+        <p>Click this button to create or update your configuration</p>
         <div class="text-center" style="margin: 50px;">
             <a th:href="@{/registration/config}">
-                <button type="button" class="btn btn-primary btn-lg btn-block">Begin configuration</button>
+                <button type="button" class="strava-btn">Begin configuration</button>
             </a>
         </div>
-        <h3>Already registered and want to clear your config / remove your connection?</h3>
+    </div>
+    <div class="col-md-6">
+        <h3>Remove My Account</h3>
         <p>Click this button to clear your configuration and remove your details from the service</p>
         <div class="text-center" style="margin: 50px;">
             <a th:href="@{/registration/remove}">
-                <button type="button" class="btn btn-danger btn-lg btn-block">Remove details</button>
+                <button type="button" class="strava-btn-deemph">Remove details</button>
             </a>
         </div>
     </div>

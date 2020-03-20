@@ -1,0 +1,56 @@
+.strava-orange {
+    color: #FC6100
+}
+
+.strava-orange-background {
+    background: #FC6100;
+}
+
+.strava-warm-gray {
+    color: #949494
+}
+
+.strava-warm-gray-background {
+    background: #949494;
+}
+
+.strava-gray {
+    color: #f7f7fa
+}
+
+.strava-gray-background {
+    background: #f7f7fa;
+}
+
+body {
+    font-family: "MaisonNeue", "Segoe UI", "Helvetica Neue", -apple-system, system-ui, BlinkMacSystemFont, Roboto, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+a:hover {
+    text-decoration: none;
+    color: #007FB6
+}
+
+.strava-btn {
+    background-color: #fc5200;
+    color: #fff;
+    font-size: 12px;
+    padding: 12px 32px;
+    align-items: center;
+    border-radius: 4px;
+    border-color: rgb(239, 82, 0);
+    font-weight: 700;
+    border-width: 1px;
+}
+
+.strava-btn-deemph {
+    background-color: #fff;
+    color: #242428;
+    font-size: 12px;
+    padding: 12px 32px;
+    align-items: center;
+    border-radius: 4px;
+    border-color: #949494;
+    font-weight: 700;
+    border-width: 1px;
+}
