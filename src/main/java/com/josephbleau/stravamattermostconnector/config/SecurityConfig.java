@@ -26,14 +26,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/strava/**", "/static/**", "/css/**");
+        web.ignoring().antMatchers("/strava/**", "/img/**", "/css/**");
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/", "/login", "/strava/**").permitAll()
+                    .antMatchers("/", "/login", "/strava/**", "/img/**", "/css/**").permitAll()
                     .antMatchers("/**").authenticated()
                 .and()
                 .oauth2Login()
