@@ -14,6 +14,13 @@
             crossorigin="anonymous"></script>
 </head>
 <body>
+<div th:if="${mattermostDetails.hidden != null and mattermostDetails.hidden}">
+    <div class="alert alert-info alert-dismissable" role="alert">
+        <b>Your mattermost settings have been auto-configured.</b> You will not be able to change them here.
+        If you wish to reset your configuration you <a th:href="@{/registration/remove}">can do so here.</a></b>
+    </div>
+</div>
+
 <div class="row'">
     <div class="col-md-12">
         <h1><a class="strava-orange" th:href="@{/}">Strava Mattermost Connector</a></h1>
@@ -22,44 +29,71 @@
         <form action="#" th:action="${nextStep}" method="post" th:object="${mattermostDetails}">
             <div class="form-row">
                 <div class="form-row col-md-12">
+                    <h3 style="margin-top: -5px;">Sharing Configuration</h3>
+                    <div class="form-group">
+                        <label for="measurementSystem">Measurement System</label>
+                        <select class="form-control" id="measurementSystem">
+                            <option>Imperial</option>
+                            <option>Metric</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activities">Types of Activities (hold CTRL to select multiple)</label>
+                        <select multiple class="form-control" id="activities">
+                            <option selected>Running</option>
+                            <option>Biking</option>
+                            <option>Swimming</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <p><b>Which details would you like to share?</b> If nothing is selected we will only share the title of the activity.</p>
+                        <input type="checkbox" class="form-check-input" id="details-pace">
+                        <span style="padding: 10px;">Pace</span>
+                        <input type="checkbox" class="form-check-input" id="details-distance">
+                        <span style="padding: 10px;">Distance</span>
+                        <input type="checkbox" class="form-check-input" id="details-duration">
+                        <span style="padding: 10px;">Duration</span>
+                        <input type="checkbox" class="form-check-input" id="details-map">
+                        <span style="padding: 10px;">Route Map</span>
+                    </div>
+                    <h3 style="margin-top: 20px;">Mattermost Configuration</h3>
                     <label for="mattermostUserName">Mattermost User Name</label>
-                    <input type="text" class="form-control" id="mattermostUserName" th:value="${mattermostDetails.userName}" th:field="*{userName}">
+                    <input style="margin-bottom: 10px;"  type="text" class="form-control" id="mattermostUserName" th:value="${mattermostDetails.userName}" th:field="*{userName}">
                 </div>
             </div>
 
-            <div th:if="${mattermostDetails.hidden == null or not mattermostDetails.hidden}">
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="mattermostHost">Mattermost Hostname</label>
-                        <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="mattermostPort">Mattermost Port</label>
-                        <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
-                    </div>
+            <div class="form-row" th:if="${mattermostDetails.hidden == null or not mattermostDetails.hidden}">
+                <div class="form-group col-md-6">
+                    <label for="mattermostHost">Mattermost Hostname</label>
+                    <input type="text" class="form-control" id="mattermostHost" th:value="${mattermostDetails.host}" th:field="*{host}" placeholder="http://">
                 </div>
-
-                <div class="form-row" style="margin-top: 20px">
-                    <div class="form-group col-md-6">
-                        <label for="mattermostTeamName">Mattermost Team Name</label>
-                        <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="mattermostChannelName">Mattermost Channel Name</label>
-                        <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-12">
-                        <label for="mattermostHookToken">Mattermost Hook Token</label>
-                        <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
-                    </div>
+                <div class="form-group col-md-6">
+                    <label for="mattermostPort">Mattermost Port</label>
+                    <input type="text" class="form-control" id="mattermostPort" th:value="${mattermostDetails.port}" th:field="*{port}" placeholder="80">
                 </div>
             </div>
-            <br>
+
+            <div class="form-row" style="margin-top: 20px" th:if="${mattermostDetails.hidden == null or not mattermostDetails.hidden}">
+                <div class="form-group col-md-6">
+                    <label for="mattermostTeamName">Mattermost Team Name</label>
+                    <input type="text" class="form-control" id="mattermostTeamName" th:value="${mattermostDetails.teamName}" th:field="*{teamName}">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="mattermostChannelName">Mattermost Channel Name</label>
+                    <input type="text" class="form-control" id="mattermostChannelName" th:value="${mattermostDetails.channelName}" th:field="*{channelName}">
+                </div>
+            </div>
+
+            <div class="form-row" th:if="${mattermostDetails.hidden == null or not mattermostDetails.hidden}">
+                <div class="form-group col-md-12">
+                    <label for="mattermostHookToken">Mattermost Hook Token</label>
+                    <input type="text" class="form-control" id="mattermostHookToken" th:value="${mattermostDetails.hookToken}" th:field="*{hookToken}">
+                </div>
+            </div>
+
             <div class="form-row">
                 <div class="form-group col-md-6">
+                    <br>
                     <button type="submit" class="strava-btn">Looks good, let's continue...</button>
                 </div>
             </div>
