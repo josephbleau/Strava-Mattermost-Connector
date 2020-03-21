@@ -6,6 +6,7 @@ public class UserDetails {
 
     private MattermostDetails mattermostDetails;
     private StravaTokenDetails stravaTokenDetails;
+    private SharingDetails sharingDetails;
 
     public String getAthleteKey() {
         return athleteKey;
@@ -37,5 +38,13 @@ public class UserDetails {
 
     public void setStravaTokenDetails(StravaTokenDetails stravaTokenDetails) {
         this.stravaTokenDetails = stravaTokenDetails;
+    }
+
+    public SharingDetails getSharingDetails() {
+        return sharingDetails;
+    }
+
+    public void setSharingDetails(SharingDetails sharingDetails) {
+        this.sharingDetails = sharingDetails;
     }
 }

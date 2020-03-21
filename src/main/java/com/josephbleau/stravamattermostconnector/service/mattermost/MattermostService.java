@@ -1,6 +1,7 @@
 package com.josephbleau.stravamattermostconnector.service.mattermost;
 
 import com.josephbleau.stravamattermostconnector.model.MattermostDetails;
+import com.josephbleau.stravamattermostconnector.model.UserDetails;
 import com.josephbleau.stravamattermostconnector.repository.UserDetailsRepository;
 import com.josephbleau.stravamattermostconnector.service.google.StaticMapService;
 import javastrava.model.StravaActivity;
@@ -23,11 +24,15 @@ public class MattermostService {
     private final UserDetailsRepository userDetailsRepository;
     private final StaticMapService staticMapService;
 
-    private static final String attachmentTemplate = "**%s**\n" +
-            "\n" +
-            "* **Distance:** %.2f mi\n" +
-            "* **Pace:** %.2f mph\n" +
-            "* **Duration:** %dh %02dm\n";
+    private static final String activityNameTemplate = "**%s**\n" + "\n";
+    private static final String distanceTemplate = "* **Distance:** %.2f %s\n";
+    private static final String paceTemplate = "* **Pace:** %.2f %s\n";
+    private static final String durationTemplate = "* **Duration:** %dh %02dm\n";
+
+    private static final String mph = "mph";
+    private static final String kph = "kph";
+    private static final String km = "km";
+    private static final String mi = "mi";
 
     @Autowired
     public MattermostService(
@@ -43,19 +48,39 @@ public class MattermostService {
 
 
     private IncomingWebhookRequest activityPayload(final StravaAthlete athlete, final StravaActivity activity) {
+        UserDetails userDetails = userDetailsRepository.getUser(String.valueOf(athlete.getId()));
+
         String text = String.format("%s completed a new activity!", athlete.getFirstname());
 
         int hours = activity.getMovingTime() / 60 / 60;
         int totalMinutes = activity.getMovingTime() / 60;
         int minutes = totalMinutes % 60;
 
-        String attachmentText = String.format(
-                attachmentTemplate,
-                activity.getName(),
-                activity.getDistance() / 1609.34,
-                activity.getAverageSpeed() * 2.23694,
-                hours, minutes
-        );
+        float imperialDistance = activity.getDistance() / 1609.34f;
+        float metricDistance = activity.getDistance();
+        float imperialSpeed = activity.getAverageSpeed() * 2.23694f;
+        float metricSpeed = activity.getAverageSpeed();
+
+        String speedUnits = mph;
+        String distanceUnits = mi;
+        float distance = imperialDistance;
+        float speed = imperialSpeed;
+
+        if ("metric".equalsIgnoreCase(userDetails.getSharingDetails().getMeasurementSystem())) {
+            speedUnits = kph;
+            distanceUnits = km;
+            distance = metricDistance;
+            speed = metricSpeed;
+        }
+
+        String paceString = String.format(paceTemplate, speed, speedUnits);
+        String distanceString = String.format(distanceTemplate, distance, distanceUnits);
+        String durationString = String.format(durationTemplate, hours, minutes);
+
+        String attachmentText = activityNameTemplate +
+                ((userDetails.getSharingDetails().isShareDistance()) ? distanceString : "") +
+                ((userDetails.getSharingDetails().isSharePace()) ? paceString : "") +
+                ((userDetails.getSharingDetails().isShareDuration()) ? durationString : "");
 
         IncomingWebhookRequest payload = new IncomingWebhookRequest();
         SlackAttachment attachment = new SlackAttachment();
@@ -63,7 +88,7 @@ public class MattermostService {
         attachment.setImageUrl(staticMapService.generateStaticMap(activity));
         attachment.setColor("#fc5200");
 
-        payload.setChannel(userDetailsRepository.getUser(String.valueOf(athlete.getId())).getMattermostDetails().getChannelName());
+        payload.setChannel(userDetails.getMattermostDetails().getChannelName());
         payload.setText(text);
         payload.setAttachments(Collections.singletonList(attachment));
         payload.setUsername(this.mmUsername);

@@ -1,6 +1,7 @@
 package com.josephbleau.stravamattermostconnector.repository;
 
 import com.josephbleau.stravamattermostconnector.model.MattermostDetails;
+import com.josephbleau.stravamattermostconnector.model.SharingDetails;
 import com.josephbleau.stravamattermostconnector.model.StravaTokenDetails;
 import com.josephbleau.stravamattermostconnector.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +68,51 @@ public class UserDetailsRepository {
             userDetailsMap.put("strava:expires-at", String.valueOf(userDetails.getStravaTokenDetails().getExpiresAt()));
         }
 
-        stringRedisTemplate.opsForHash().putAll("user:" + userDetails.getAthleteKey(), userDetailsMap);
+        userDetailsMap.put("sharing:measurement-system", userDetails.getSharingDetails().getMeasurementSystem());
 
+        if (userDetails.getSharingDetails().isShareRunning()) {
+            userDetailsMap.put("sharing:running", String.valueOf(userDetails.getSharingDetails().isShareRunning()));
+        } else {
+            userDetailsMap.put("sharing:running", "false");
+        }
+
+        if (userDetails.getSharingDetails().isShareBiking()) {
+            userDetailsMap.put("sharing:biking", String.valueOf(userDetails.getSharingDetails().isShareBiking()));
+        } else {
+            userDetailsMap.put("sharing:biking", "false");
+        }
+
+        if (userDetails.getSharingDetails().isShareSwimming()) {
+            userDetailsMap.put("sharing:swimming", String.valueOf(userDetails.getSharingDetails().isShareSwimming()));
+        } else {
+            userDetailsMap.put("sharing:swimming", "false");
+        }
+
+        if (userDetails.getSharingDetails().isShareDistance()) {
+            userDetailsMap.put("sharing:distance", String.valueOf(userDetails.getSharingDetails().isShareDistance()));
+        } else {
+            userDetailsMap.put("sharing:distance", "false");
+        }
+
+        if (userDetails.getSharingDetails().isSharePace()) {
+            userDetailsMap.put("sharing:pace", String.valueOf(userDetails.getSharingDetails().isSharePace()));
+        } else {
+            userDetailsMap.put("sharing:pace", "false");
+        }
+
+        if (userDetails.getSharingDetails().isShareDuration()) {
+            userDetailsMap.put("sharing:duration", String.valueOf(userDetails.getSharingDetails().isShareDistance()));
+        } else {
+            userDetailsMap.put("sharing:duration", "false");
+        }
+
+        if (userDetails.getSharingDetails().isShareRouteMap()) {
+            userDetailsMap.put("sharing:route-map", String.valueOf(userDetails.getSharingDetails().isShareRouteMap()));
+        } else {
+            userDetailsMap.put("sharing:route-map", "false");
+        }
+
+        stringRedisTemplate.opsForHash().putAll("user:" + userDetails.getAthleteKey(), userDetailsMap);
     }
 
     public UserDetails getUser(String athleteKey) {
@@ -77,9 +121,11 @@ public class UserDetailsRepository {
         UserDetails userDetails = new UserDetails();
         MattermostDetails mattermostDetails = new MattermostDetails();
         StravaTokenDetails stravaTokenDetails = new StravaTokenDetails();
+        SharingDetails sharingDetails = new SharingDetails();
 
         userDetails.setMattermostDetails(mattermostDetails);
         userDetails.setStravaTokenDetails(stravaTokenDetails);
+        userDetails.setSharingDetails(sharingDetails);
 
         if (storedDetails.containsKey("mattermost:hidden")) {
             mattermostDetails.setHidden(Boolean.parseBoolean((String) storedDetails.get("mattermost:hidden")));
@@ -101,6 +147,50 @@ public class UserDetailsRepository {
         mattermostDetails.setUserName((String) storedDetails.get("mattermost:user-name"));
         stravaTokenDetails.setToken((String) storedDetails.get("strava:token"));
         stravaTokenDetails.setRefreshToken((String) storedDetails.get("strava:refresh-token"));
+        sharingDetails.setMeasurementSystem((String) storedDetails.get("sharing:measurement-system"));
+
+        if (storedDetails.get("sharing:running") == null) {
+            sharingDetails.setShareRunning(false);
+        } else {
+            sharingDetails.setShareRunning(Boolean.parseBoolean((String)storedDetails.get("sharing:running")));
+        }
+
+        if (storedDetails.get("sharing:biking") == null) {
+            sharingDetails.setShareBiking(false);
+        } else {
+            sharingDetails.setShareBiking(Boolean.parseBoolean((String) storedDetails.get("sharing:biking")));
+        }
+
+        if (storedDetails.get("sharing:swimming") == null) {
+            sharingDetails.setShareSwimming(false);
+        } else {
+            sharingDetails.setShareSwimming(Boolean.parseBoolean((String) storedDetails.get("sharing:swimming")));
+        }
+
+        if (storedDetails.get("sharing:distance") == null) {
+            sharingDetails.setShareDistance(false);
+        } else {
+            sharingDetails.setShareDistance(Boolean.parseBoolean((String) storedDetails.get("sharing:distance")));
+        }
+
+        if (storedDetails.get("sharing:pace") == null) {
+            sharingDetails.setSharePace(false);
+        } else {
+            sharingDetails.setSharePace(Boolean.parseBoolean((String) storedDetails.get("sharing:pace")));
+        }
+
+        if (storedDetails.get("sharing:duration") == null) {
+            sharingDetails.setShareDuration(false);
+        } else {
+            sharingDetails.setShareDuration(Boolean.parseBoolean((String) storedDetails.get("sharing:duration")));
+        }
+
+        if (storedDetails.get("sharing:route-map") == null) {
+            sharingDetails.setShareRouteMap(false);
+        } else {
+            sharingDetails.setShareRouteMap(Boolean.parseBoolean((String) storedDetails.get("sharing:route-map")));
+        }
+
         userDetails.setAthleteKey(athleteKey);
 
         return userDetails;
