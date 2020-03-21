@@ -24,10 +24,10 @@ public class MattermostService {
     private final UserDetailsRepository userDetailsRepository;
     private final StaticMapService staticMapService;
 
-    private static final String activityNameTemplate = "**%s**\n\n";
-    private static final String distanceTemplate = "* **Distance:** %.2f %s\n";
-    private static final String paceTemplate = "* **Pace:** %.2f %s\n";
-    private static final String durationTemplate = "* **Duration:** %dh %02dm\n";
+    private static final String activityNameTemplate = "**%s**  \n";
+    private static final String distanceTemplate = "* **Distance:** %.2f %s  \n";
+    private static final String paceTemplate = "* **Pace:** %.2f %s  \n";
+    private static final String durationTemplate = "* **Duration:** %dh %02dm  \n";
 
     private static final String mph = "mph";
     private static final String kph = "kph";
