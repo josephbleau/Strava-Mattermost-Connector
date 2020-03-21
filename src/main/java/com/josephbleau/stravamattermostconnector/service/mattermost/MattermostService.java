@@ -9,11 +9,14 @@ import javastrava.model.StravaAthlete;
 import net.bis5.mattermost.client4.hook.IncomingWebhookClient;
 import net.bis5.mattermost.model.IncomingWebhookRequest;
 import net.bis5.mattermost.model.SlackAttachment;
+import net.bis5.mattermost.model.SlackAttachmentField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class MattermostService {
@@ -25,9 +28,9 @@ public class MattermostService {
     private final StaticMapService staticMapService;
 
     private static final String activityNameTemplate = "**%s**  \n";
-    private static final String distanceTemplate = "* **Distance:** %.2f %s  \n";
-    private static final String paceTemplate = "* **Pace:** %.2f %s  \n";
-    private static final String durationTemplate = "* **Duration:** %dh %02dm  \n";
+    private static final String distanceTemplate = "%.2f %s";
+    private static final String paceTemplate = "%.2f %s";
+    private static final String durationTemplate = "%dh %02dm";
 
     private static final String mph = "mph";
     private static final String kph = "kph";
@@ -49,6 +52,8 @@ public class MattermostService {
 
     private IncomingWebhookRequest activityPayload(final StravaAthlete athlete, final StravaActivity activity) {
         UserDetails userDetails = userDetailsRepository.getUser(String.valueOf(athlete.getId()));
+        IncomingWebhookRequest payload = new IncomingWebhookRequest();
+        SlackAttachment attachment = new SlackAttachment();
 
         String text = String.format("%s completed a new activity!", athlete.getFirstname());
 
@@ -77,18 +82,39 @@ public class MattermostService {
         String distanceString = String.format(distanceTemplate, distance, distanceUnits);
         String durationString = String.format(durationTemplate, hours, minutes);
 
-        String attachmentText = activityNameTemplate.format(activity.getName()) +
-                ((userDetails.getSharingDetails().isShareDistance()) ? distanceString : "") +
-                ((userDetails.getSharingDetails().isSharePace()) ? paceString : "") +
-                ((userDetails.getSharingDetails().isShareDuration()) ? durationString : "");
-
-        IncomingWebhookRequest payload = new IncomingWebhookRequest();
-        SlackAttachment attachment = new SlackAttachment();
-        attachment.setText(attachmentText);
         if (userDetails.getSharingDetails().isShareRouteMap()) {
             attachment.setImageUrl(staticMapService.generateStaticMap(activity));
         }
+
+        List<SlackAttachmentField> slackAttachmentFieldList = new ArrayList<>();
+        SlackAttachmentField typeField = new SlackAttachmentField();
+        typeField.setTitle("Activity");
+        typeField.setValue(activity.getType().getDescription());
+        typeField.setShortField(true);
+
+        SlackAttachmentField distanceField = new SlackAttachmentField();
+        distanceField.setTitle("Distance");
+        distanceField.setValue(distanceString);
+        distanceField.setShortField(true);
+
+        SlackAttachmentField durationField = new SlackAttachmentField();
+        durationField.setTitle("Duration");
+        durationField.setValue(durationString);
+        durationField.setShortField(true);
+
+        SlackAttachmentField paceField = new SlackAttachmentField();
+        paceField.setTitle("Pace");
+        paceField.setValue(paceString);
+        paceField.setShortField(true);
+
+        slackAttachmentFieldList.add(typeField);
+        slackAttachmentFieldList.add(durationField);
+        slackAttachmentFieldList.add(distanceField);
+        slackAttachmentFieldList.add(paceField);
+
         attachment.setColor("#fc5200");
+        attachment.setFields(slackAttachmentFieldList);
+        attachment.setTitle(activity.getName());
 
         payload.setChannel(userDetails.getMattermostDetails().getChannelName());
         payload.setText(text);
