@@ -1,12 +1,14 @@
 package com.josephbleau.stravamattermostconnector.web.controller;
 
 import com.josephbleau.stravamattermostconnector.model.MattermostDetails;
+import com.josephbleau.stravamattermostconnector.model.SharingDetails;
 import com.josephbleau.stravamattermostconnector.model.StravaTokenDetails;
 import com.josephbleau.stravamattermostconnector.model.UserDetails;
 import com.josephbleau.stravamattermostconnector.repository.UserDetailsRepository;
 import com.josephbleau.stravamattermostconnector.service.mattermost.MattermostService;
 import com.josephbleau.stravamattermostconnector.service.registration.ShareCodeManager;
 import com.josephbleau.stravamattermostconnector.service.registration.VerificationCodeManager;
+import com.josephbleau.stravamattermostconnector.web.dto.ConfigurationDetailsDTO;
 import com.josephbleau.stravamattermostconnector.web.dto.VerificationCodeDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,7 @@ public class RegistrationController {
         MattermostDetails mattermostDetails = shareCodeManager.getSettings(code);
         userDetails.setMattermostDetails(mattermostDetails);
         userDetails.setStravaTokenDetails(getTokenDetails(request));
+        userDetails.setSharingDetails(new SharingDetails());
 
         userDetails.setAthleteKey(oAuth2User.getName());
         userDetails.setVerified(false);
@@ -71,21 +74,27 @@ public class RegistrationController {
     @GetMapping("/config")
     public String config(Model model,
                          @AuthenticationPrincipal final OAuth2User oauth2User) {
+        ConfigurationDetailsDTO configurationDetails = new ConfigurationDetailsDTO();
         MattermostDetails mattermostDetails = new MattermostDetails();
+        SharingDetails sharingDetails = new SharingDetails();
 
         UserDetails userDetails = userDetailsRepository.getUser(oauth2User.getName());
 
         if (userDetails != null && userDetails.isVerified()) {
             mattermostDetails = userDetails.getMattermostDetails();
+            sharingDetails = userDetails.getSharingDetails();
             model.addAttribute("nextStep", "/registration/end");
         } else if (userDetails != null && !userDetails.isVerified() && userDetails.getMattermostDetails().getHidden() != null && userDetails.getMattermostDetails().getHidden()) {
             mattermostDetails = userDetails.getMattermostDetails();
+            sharingDetails = userDetails.getSharingDetails();
             model.addAttribute("nextStep", "/registration/verify");
         } else {
             model.addAttribute("nextStep", "/registration/verify");
         }
 
-        model.addAttribute("mattermostDetails", mattermostDetails);
+        configurationDetails.setMattermostDetails(mattermostDetails);
+        configurationDetails.setSharingDetails(sharingDetails);
+        model.addAttribute("configurationDetails", configurationDetails);
 
         return "registration/config";
     }
@@ -93,7 +102,7 @@ public class RegistrationController {
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public String verify(Model model,
                          @AuthenticationPrincipal final OAuth2User oAuth2User,
-                         @ModelAttribute MattermostDetails mattermostDetails,
+                         @ModelAttribute ConfigurationDetailsDTO configurationDetails,
                          @RequestParam(value = "error", required = false) final String error,
                          HttpServletRequest request)  {
 
@@ -103,16 +112,17 @@ public class RegistrationController {
 
             userDetails.setAthleteKey(oAuth2User.getName());
             userDetails.setVerified(false);
-            mattermostDetails.setHidden(hiddenMatterMostDetails.getHidden());
-            userDetails.setMattermostDetails(mattermostDetails);
+            configurationDetails.getMattermostDetails().setHidden(hiddenMatterMostDetails.getHidden());
+            userDetails.setMattermostDetails(configurationDetails.getMattermostDetails());
             userDetails.setStravaTokenDetails(getTokenDetails(request));
+            userDetails.setSharingDetails(configurationDetails.getSharingDetails());
 
             userDetailsRepository.saveUser(userDetails);
 
-            if (mattermostDetails.getHidden() != null && mattermostDetails.getHidden()) {
+            if (configurationDetails.getMattermostDetails().getHidden() != null && configurationDetails.getMattermostDetails().getHidden()) {
                 mattermostService.sendVerificationCode(hiddenMatterMostDetails, verificationCodeManager.getCode());
             } else {
-                mattermostService.sendVerificationCode(mattermostDetails, verificationCodeManager.getCode());
+                mattermostService.sendVerificationCode(configurationDetails.getMattermostDetails(), verificationCodeManager.getCode());
             }
         }
 
@@ -150,11 +160,12 @@ public class RegistrationController {
     @PostMapping("/end")
     public String endExistingUser(Model model,
                                   @AuthenticationPrincipal final OAuth2User oAuth2User,
-                                  @ModelAttribute final MattermostDetails mattermostDetails,
+                                  @ModelAttribute final ConfigurationDetailsDTO configurationDetails,
                                   final HttpServletRequest request) {
         UserDetails userDetails = userDetailsRepository.getUser(oAuth2User.getName());
-        userDetails.setMattermostDetails(mattermostDetails);
+        userDetails.setMattermostDetails(configurationDetails.getMattermostDetails());
         userDetails.setStravaTokenDetails(getTokenDetails(request));
+        userDetails.setSharingDetails(configurationDetails.getSharingDetails());
         userDetailsRepository.saveUser(userDetails);
 
         String baseUrl = String.format("%s://%s:%d",request.getScheme(),  request.getServerName(), request.getServerPort());
