@@ -77,7 +77,7 @@ public class MattermostService {
         String distanceString = String.format(distanceTemplate, distance, distanceUnits);
         String durationString = String.format(durationTemplate, hours, minutes);
 
-        String attachmentText = activityNameTemplate +
+        String attachmentText = activityNameTemplate.format(activity.getName()) +
                 ((userDetails.getSharingDetails().isShareDistance()) ? distanceString : "") +
                 ((userDetails.getSharingDetails().isSharePace()) ? paceString : "") +
                 ((userDetails.getSharingDetails().isShareDuration()) ? durationString : "");
@@ -85,7 +85,9 @@ public class MattermostService {
         IncomingWebhookRequest payload = new IncomingWebhookRequest();
         SlackAttachment attachment = new SlackAttachment();
         attachment.setText(attachmentText);
-        attachment.setImageUrl(staticMapService.generateStaticMap(activity));
+        if (userDetails.getSharingDetails().isShareRouteMap()) {
+            attachment.setImageUrl(staticMapService.generateStaticMap(activity));
+        }
         attachment.setColor("#fc5200");
 
         payload.setChannel(userDetails.getMattermostDetails().getChannelName());
