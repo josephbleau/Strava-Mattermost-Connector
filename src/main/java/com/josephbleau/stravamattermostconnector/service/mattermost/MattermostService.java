@@ -127,11 +127,17 @@ public class MattermostService {
 
     public void postActivity(final StravaAthlete athlete, final StravaActivity activity) {
         String athleteId = String.valueOf(activity.getAthlete().getId());
+        UserDetails userDetails = userDetailsRepository.getUser(athleteId);
 
-        IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteId));
-        IncomingWebhookRequest payload = activityPayload(athlete, activity);
+        if ((activity.getType().name().equalsIgnoreCase("run") && userDetails.getSharingDetails().isShareRunning()) ||
+                (activity.getType().name().equalsIgnoreCase("ride") && userDetails.getSharingDetails().isShareBiking()) ||
+                (activity.getType().name().equalsIgnoreCase("swim") && userDetails.getSharingDetails().isShareSwimming())) {
 
-        incomingWebhookClient.postByIncomingWebhook(payload);
+            IncomingWebhookClient incomingWebhookClient = new IncomingWebhookClient(getMattermostPostEndpoint(athleteId));
+            IncomingWebhookRequest payload = activityPayload(athlete, activity);
+
+            incomingWebhookClient.postByIncomingWebhook(payload);
+        }
     }
 
     public void sendVerificationCode(final MattermostDetails mattermostDetails, final String verificationCode) {
