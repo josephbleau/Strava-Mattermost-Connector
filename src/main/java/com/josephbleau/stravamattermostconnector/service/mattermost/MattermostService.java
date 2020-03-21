@@ -24,7 +24,7 @@ public class MattermostService {
     private final UserDetailsRepository userDetailsRepository;
     private final StaticMapService staticMapService;
 
-    private static final String activityNameTemplate = "**%s**\n" + "\n";
+    private static final String activityNameTemplate = "**%s**\n\n";
     private static final String distanceTemplate = "* **Distance:** %.2f %s\n";
     private static final String paceTemplate = "* **Pace:** %.2f %s\n";
     private static final String durationTemplate = "* **Duration:** %dh %02dm\n";
@@ -57,9 +57,9 @@ public class MattermostService {
         int minutes = totalMinutes % 60;
 
         float imperialDistance = activity.getDistance() / 1609.34f;
-        float metricDistance = activity.getDistance();
+        float metricDistance = activity.getDistance() / 1000.00f;
         float imperialSpeed = activity.getAverageSpeed() * 2.23694f;
-        float metricSpeed = activity.getAverageSpeed();
+        float metricSpeed = activity.getAverageSpeed() * 3.6f;
 
         String speedUnits = mph;
         String distanceUnits = mi;
